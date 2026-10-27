@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>冒险者测验</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #2B2140;
+  --muted: #6E6585;
+  --paper: #F2EEF7;
+  --card: #FFFFFF;
+  --line: #DCD3E8;
+  --ruby: #C2405A;
+  --emerald: #2A8763;
+  --topaz: #B67A12;
+  --sapphire: #3C68C6;
+  --lit: #2B2140;
+  --lit-ink: #FFFFFF;
+  --display: "ZCOOL KuaiLe", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --body: -apple-system, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #EDE8F5;
+    --muted: #A99FC0;
+    --paper: #1C1629;
+    --card: #2A2140;
+    --line: #42375C;
+    --ruby: #F07A90;
+    --emerald: #5CC79C;
+    --topaz: #E8B04A;
+    --sapphire: #86A8F0;
+    --lit: #EDE8F5;
+    --lit-ink: #1C1629;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 28px 16px calc(40px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+}
+.screen { display: none; }
+.screen.on { display: block; }
+h1, h2, .display { font-family: var(--display); font-weight: 400; letter-spacing: 0.02em; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--sapphire); outline-offset: 2px; }
+
+/* ---------- 开始页 ---------- */
+.die { width: 72px; height: 72px; color: var(--ruby); display: block; }
+.start h1 { font-size: 40px; line-height: 1.2; margin: 24px 0 12px; }
+.start .lead { color: var(--muted); margin: 0 0 32px; }
+.field label { display: block; font-weight: 600; margin-bottom: 6px; }
+.field .hint { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+.field input {
+  width: 100%;
+  font: inherit;
+  font-size: 18px;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+}
+.field input:focus { border-color: var(--sapphire); outline: none; }
+.err { color: var(--ruby); font-size: 14px; min-height: 22px; margin: 6px 0 0; }
+.primary {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 18px;
+  font-weight: 600;
+}
+.primary:active { transform: translateY(1px); }
+
+/* ---------- 章节过渡 ---------- */
+.chapter { padding-top: 18vh; }
+.chapter h2 { font-size: 34px; line-height: 1.25; margin: 0 0 16px; }
+.chapter p { font-size: 18px; margin: 0; }
+
+/* ---------- 答题页 ---------- */
+.ticks { display: flex; gap: 10px; margin-bottom: 14px; }
+.ticks .grp { flex: 1; display: flex; gap: 2px; }
+.ticks i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.ticks i.done { background: var(--ink); }
+.ticks i.now { background: var(--ruby); }
+.where { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+.question { font-size: 24px; line-height: 1.45; font-weight: 600; margin: 0 0 24px; min-height: 2.9em; }
+.opts { display: grid; gap: 12px; }
+.opt {
+  text-align: left;
+  padding: 16px 18px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 17px;
+  line-height: 1.5;
+  transition: border-color .12s, background .12s;
+}
+@media (hover: hover) { .opt:hover { border-color: var(--muted); } }
+.opt.picked { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.back {
+  margin-top: 24px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+}
+.back[hidden] { display: none; }
+
+/* ---------- 掷骰 ---------- */
+.rolling { padding-top: 24vh; text-align: center; }
+.rolling .die { width: 120px; height: 120px; margin: 0 auto 24px; }
+.rolling p { color: var(--muted); }
+.spin { animation: roll 1.4s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes roll {
+  0% { transform: rotate(0) scale(.6); }
+  70% { transform: rotate(980deg) scale(1.08); }
+  100% { transform: rotate(1080deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+/* ---------- 结果页 ---------- */
+.card-head { margin-bottom: 28px; }
+.card-head .label { color: var(--muted); font-size: 14px; margin: 0; }
+.card-head .who { font-size: 30px; margin: 2px 0 16px; line-height: 1.2; word-break: break-all; }
+.concept { font-family: var(--display); font-size: 26px; line-height: 1.5; margin: 0 0 10px; }
+.concept .c { color: var(--ruby); }
+.concept .s { color: var(--emerald); }
+.concept .b { color: var(--topaz); }
+.concept .a { color: var(--sapphire); }
+.tagline { color: var(--muted); margin: 0; }
+
+.block {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px 18px 16px;
+  margin-bottom: 16px;
+  border-top: 6px solid var(--line);
+}
+.block.c { border-top-color: var(--ruby); }
+.block.s { border-top-color: var(--emerald); }
+.block.b { border-top-color: var(--topaz); }
+.block.a { border-top-color: var(--sapphire); }
+.block h2 { font-size: 20px; margin: 0 0 12px; }
+.block.c h2 { color: var(--ruby); }
+.block.s h2 { color: var(--emerald); }
+.block.b h2 { color: var(--topaz); }
+.block.a h2 { color: var(--sapphire); }
+.pick-main .nm { font-size: 24px; font-weight: 700; line-height: 1.3; }
+.nm .en { font-size: 15px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+.pick-main p { margin: 6px 0 0; }
+.diff { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.diff .star { letter-spacing: 2px; color: var(--ink); }
+.alts { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.alts .lbl { font-size: 14px; color: var(--muted); margin: 0 0 6px; }
+.alt { margin: 0 0 8px; font-size: 15px; line-height: 1.5; }
+.alt b { font-size: 16px; }
+.alt .en { color: var(--muted); font-size: 13px; margin: 0 4px; }
+
+.grid9 { display: grid; grid-template-columns: 2.4em repeat(3, 1fr); gap: 4px; margin-top: 4px; font-size: 14px; text-align: center; }
+.grid9 .ax { color: var(--muted); align-self: center; padding: 4px 0; }
+.grid9 .cell { padding: 10px 2px; border-radius: 8px; border: 1px solid var(--line); color: var(--muted); }
+.grid9 .cell.lit { background: var(--lit); color: var(--lit-ink); border-color: var(--lit); font-weight: 700; }
+.align-desc { margin: 12px 0 0; }
+
+.lore {
+  font-family: "Songti SC", "Noto Serif SC", "Source Han Serif SC", "STSong", "SimSun", serif;
+  font-size: 16px;
+  line-height: 1.9;
+  margin: 10px 0 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--line);
+}
+.block.c .lore { border-left-color: var(--ruby); }
+.block.s .lore { border-left-color: var(--emerald); }
+.block.a .lore { border-left-color: var(--sapphire); }
+.plain { font-size: 15px; color: var(--muted); margin: 10px 0 0; }
+.more { margin-top: 4px; }
+.more summary { font-size: 14px; color: var(--muted); cursor: pointer; padding: 4px 0; }
+.more .lore { font-size: 15px; }
+
+.axes { margin: 16px 0 0; display: grid; gap: 14px; }
+.axis-row { display: grid; grid-template-columns: 2.6em 1fr 2.6em; align-items: center; gap: 8px; font-size: 14px; }
+.axis-row .end { color: var(--muted); }
+.axis-row .end:last-child { text-align: right; }
+.track { position: relative; height: 8px; border-radius: 4px; background: var(--line); }
+.track .third { position: absolute; top: -3px; width: 1px; height: 14px; background: var(--muted); opacity: .5; }
+.track .dot { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--sapphire); border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--sapphire); }
+.axis-note { font-size: 13px; color: var(--muted); margin: 4px 0 0; line-height: 1.5; }
+.like { margin: 10px 0 0; font-size: 15px; }
+.warn { margin: 12px 0 0; font-size: 14px; padding: 10px 12px; border-radius: 10px; background: var(--paper); }
+
+.note { color: var(--muted); font-size: 14px; margin: 20px 0 0; }
+.status { margin: 24px 0 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); font-size: 15px; }
+.status button { border: 0; background: none; padding: 0; color: var(--sapphire); text-decoration: underline; font-size: 15px; }
+.again { background: none; color: var(--ink); border: 2px solid var(--ink); }
+</style>
+</head>
+<body>
+<main>
+
+<!-- 开始 -->
+<section class="screen start on" id="s-start">
+  <svg class="die" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"><polygon points="50,5 89,27.5 89,72.5 50,95 11,72.5 11,27.5"/><polygon points="50,24 74,66 26,66"/><path d="M50 5 50 24M89 27.5 74 66M11 27.5 26 66M50 95 26 66M50 95 74 66M89 72.5 74 66M11 72.5 26 66M11 27.5 50 24M89 27.5 50 24"/></g></svg>
+  <h1>你会是什么样的冒险者？</h1>
+  <p class="lead">30 道题，大约 8 分钟，每次打开题目都不太一样。答完会推荐适合你的职业、物种、背景和阵营，凭第一感觉选就好，没有对错。</p>
+  <div class="field">
+    <label for="name">你的名字</label>
+    <p class="hint">主持人靠这个名字认出你，用群里的昵称就行</p>
+    <input id="name" maxlength="20" autocomplete="nickname" placeholder="比如：小王">
+    <p class="err" id="name-err" role="alert"></p>
+  </div>
+  <button class="primary" id="btn-start">开始答题</button>
+</section>
+
+<!-- 章节过渡 -->
+<section class="screen chapter" id="s-chapter">
+  <h2 id="ch-title"></h2>
+  <p id="ch-text"></p>
+  <button class="primary" id="btn-chapter">继续</button>
+</section>
+
+<!-- 答题 -->
+<section class="screen" id="s-quiz">
+  <div class="ticks" id="ticks" aria-hidden="true"></div>
+  <div class="where"><span id="ch-label"></span><span id="q-count"></span></div>
+  <p class="question" id="q-text"></p>
+  <div class="opts" id="q-opts"></div>
+  <button class="back" id="btn-back">← 上一题</button>
+</section>
+
+<!-- 掷骰 -->
+<section class="screen rolling" id="s-roll">
+  <svg class="die" id="roll-die" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><polygon points="50,5 89,27.5 89,72.5 50,95 11,72.5 11,27.5"/><polygon points="50,24 74,66 26,66"/><path d="M50 5 50 24M89 27.5 74 66M11 27.5 26 66M50 95 26 66M50 95 74 66M89 72.5 74 66M11 72.5 26 66M11 27.5 50 24M89 27.5 50 24"/></g><text x="50" y="57" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" stroke="none">20</text></svg>
+  <p>命运的骰子正在转动……</p>
+</section>
+
+<!-- 结果 -->
+<section class="screen" id="s-result">
+  <div class="card-head">
+    <p class="label">冒险者登记卡</p>
+    <h1 class="who" id="r-name"></h1>
+    <p class="concept" id="r-concept"></p>
+    <p class="tagline" id="r-tagline"></p>
+  </div>
+
+  <div class="block c">
+    <h2>职业</h2>
+    <div id="r-class"></div>
+  </div>
+  <div class="block s">
+    <h2>物种</h2>
+    <div id="r-species"></div>
+  </div>
+  <div class="block b">
+    <h2>背景（当冒险者之前的身份）</h2>
+    <div id="r-bg"></div>
+  </div>
+  <div class="block a">
+    <h2>阵营</h2>
+    <div class="grid9" id="r-grid"></div>
+    <div id="r-align"></div>
+  </div>
+
+  <p class="note">推荐只是参考。每项给了三个，挑你最喜欢的那个就行，最后跟主持人商量。</p>
+  <div class="status" id="r-status" role="status"></div>
+  <button class="primary again" id="btn-again">重新测一次</button>
+</section>
+
+</main>
+
+<script>
+/* ============ 设置 ============
+   把 Google 表格脚本部署后得到的网址，粘贴到下面的引号里。
+   留空的话，结果不会发给主持人（适合自己先试玩）。 */
+var SHEET_URL = "https://script.google.com/macros/s/AKfycbyZns1e0GEYFsOjs5O7vhjglOnJiPHgfGkYp4EZYqeF8PkvXcbskg8hAM8ckfrWcUdx/exec";
+</script>
+<script>
+// ===== 题库与结果数据 =====
+// 名称采用《5E 不全书》的译法
+var QUIZ = {};
+
+QUIZ.classes = [
+  { id: "fighter", zh: "战士", en: "Fighter", stars: 1,
+    desc: "武器专家，什么兵器都会用，稳定可靠，新手首选",
+    lore: "铁与汗水铸成的人。别人祈祷、念咒的时候，你在擦拭兵刃。剑、斧、长枪、弓弩，到了你手里都只是手臂的延伸。你的力量没有任何神秘可言——它来自一万次挥砍、一千场苦战，和那口从不认输的气。当队伍陷入绝境时，最后还站着的，往往是你。" },
+  { id: "barbarian", zh: "野蛮人", en: "Barbarian", stars: 1,
+    desc: "一发怒就变成人形坦克，抗揍、伤害高，操作最简单",
+    lore: "你的血里住着一场风暴。平日里，它沉睡如山；一旦被激怒，它便呼啸而出——那不是寻常的愤怒，而是猛兽扑食时的凶性、雷霆劈落时的轰鸣。刀剑砍在你身上像挠痒，敌人在你的咆哮里发抖。你不需要什么战术，因为你本身就是一场天灾。" },
+  { id: "rogue", zh: "游荡者", en: "Rogue", stars: 2,
+    desc: "潜行、开锁、偷袭样样精通，找准时机给敌人致命一击",
+    lore: "你是阴影里的一声轻笑。锁在你指尖叹息着打开，陷阱在你脚下默默失效，守卫直到倒下的那一刻才察觉你的存在。你不屑正面硬拼——一击，只需要一击，落在最致命的地方。世人叫你小偷、刺客、间谍，你只当那是对手艺的夸奖。" },
+  { id: "ranger", zh: "游侠", en: "Ranger", stars: 2,
+    desc: "野外专家兼神射手，擅长追踪，还会一点自然魔法",
+    lore: "城市的喧嚣与你无关，你属于荒野的边缘。你读得懂折断的草茎、泥里的爪印、风中若有若无的血腥味。你的箭从不虚发，你的脚步惊不起一只飞鸟。在文明与蛮荒的交界处，你是那道看不见的防线，守护着沉睡的村庄，却从不留下名字。" },
+  { id: "paladin", zh: "圣武士", en: "Paladin", stars: 2,
+    desc: "立下誓言的神圣骑士，能打能扛还能治疗",
+    lore: "你曾在某个黎明立下誓言，从此，那句誓言便成了你的骨。为它，你披上重甲，挡在弱者身前；为它，你的剑刃燃起圣光，你的双手能抚平伤痛。誓言给你力量，也是你的枷锁——一旦背弃，光便会离你而去。你是行走的誓约，是黑夜里一面不倒的旗。" },
+  { id: "monk", zh: "武僧", en: "Monk", stars: 2,
+    desc: "徒手功夫高手，速度快、连击多，像武侠片主角",
+    lore: "你把自己的身体炼成了兵器。在晨钟暮鼓之间，你学会了呼吸，学会了静坐，也学会了让一拳快过离弦之箭。你踏水而行，飞檐走壁，徒手接下劈来的刀锋。别人追求身外之物的力量，你追问的只有一件事：一个人，究竟能走多远？" },
+  { id: "cleric", zh: "牧师", en: "Cleric", stars: 2,
+    desc: "神明的代言人，能治疗、能加护，也能抡锤子，队伍的定心丸",
+    lore: "神明在你耳边低语，而你替祂把话说给人间听。你一手持圣徽，一手握战锤：既能在战场上为伙伴合拢伤口、驱散恐惧，也能降下神怒，让亡灵化为灰烬。你未必是最强的那个，却永远是大家最需要的那个——因为有你在，倒下的人就还能站起来。" },
+  { id: "bard", zh: "吟游诗人", en: "Bard", stars: 2,
+    desc: "靠音乐和嘴皮子的万金油，会魔法、会鼓舞队友，还能忽悠敌人",
+    lore: "传说世界诞生于一首歌，而你记得其中几个音符。你的琴声能让懦夫拔剑，你的一句俏皮话能让国王大笑、让敌人发愣。你走遍天涯，收集故事，也制造故事。魔法、剑术、谎言和真心，你都略懂一二——在你看来，人生本就是一场值得被传唱的冒险。" },
+  { id: "warlock", zh: "魔契师", en: "Warlock", stars: 2,
+    desc: "和神秘存在签了契约换来力量，招牌技能是一发“魔能爆”",
+    lore: "你和某个不该被直呼其名的存在签了约。也许是深渊里的魔王，也许是妖精国度的女王，也许是星海彼端不可名状的古老之物。祂给了你力量，而你付出了……什么？你自己也说不清。你的魔法不靠苦读，而是从契约里汩汩涌出，带着一丝不属于这个世界的寒意。" },
+  { id: "druid", zh: "德鲁伊", en: "Druid", stars: 3,
+    desc: "大自然的守护者，能变成动物，还会自然魔法",
+    lore: "你是森林的耳朵、大地的脉搏。你能与老橡树交谈，向风暴借来雷霆，也能化身为狼、为熊、为翱翔的苍鹰。文明在扩张，荒野在退缩，而你站在两者之间，守护着那份古老的平衡。对你而言，一片落叶的分量，并不比一座城池轻。" },
+  { id: "sorcerer", zh: "术士", en: "Sorcerer", stars: 3,
+    desc: "天生自带魔力，不用读书，还能随手改造自己的法术",
+    lore: "魔法不是你学来的，它就在你的血里。也许你的祖先曾与巨龙结下血盟，也许你出生那夜天降异象。小时候你一发脾气，蜡烛就会自己燃起来。别人皓首穷经才能掌握的法术，你凭直觉就能施展，甚至随手揉捏、改造。天赋是礼物，也是一团你必须学会驾驭的火。" },
+  { id: "wizard", zh: "法师", en: "Wizard", stars: 3,
+    desc: "靠读书学魔法的学者，法术种类最多，但要记的东西也最多",
+    lore: "你在烛火下熬过了无数个夜晚，只为读懂一行古老的符文。对你来说，魔法是一门学问：它有规律、有公式，可以被研究、记录和掌握。你的法术书比任何宝藏都珍贵，里面写着召唤火球、扭曲时空、打开异界之门的秘密。知识就是力量——这句话在你这里，是字面意思。" },
+  { id: "artificer", zh: "奇械师", en: "Artificer", stars: 3,
+    desc: "魔法发明家，能把魔法注入道具，还会造机械帮手",
+    lore: "别人把魔法当成神迹，你把它当成零件。齿轮、符文、炼金药剂、注入了魔力的螺丝钉——在你的工作台上，奇迹被一件件组装出来。你能让一把普通的锤子喷出火焰，能造一只会走路的机械小狗陪你冒险。你相信，只要材料和时间足够，就没有修不好、造不出的东西。" }
+];
+
+// look: 外形（human 像人 / touch 有点特别 / animal 动物样 / alien 完全不像人）
+// tags: 气质标签，第一个最重要
+QUIZ.species = [
+  { id: "human", zh: "人类", en: "Human", look: "human", tags: ["city", "calm"],
+    desc: "什么都能做，适应力最强，最稳的选择",
+    lore: "人类的寿命不过百年，却总想在有限的日子里做完所有事。他们建起最多的城市，走过最远的道路，也在世界各地留下最多的传说。人类没有尖耳朵，也没有翅膀，他们最大的天赋是：适应一切，然后改变一切。" },
+  { id: "elf", zh: "精灵", en: "Elf", look: "touch", tags: ["forest", "arcane", "fey"],
+    desc: "尖耳朵，能活几百年，优雅，亲近自然和魔法",
+    lore: "精灵见证过王朝的兴衰，看过森林从幼苗长成参天巨木。他们不睡觉，只在冥想中回味数百年的往事。精灵的举止优雅得近乎疏离，可一旦你成了他们的朋友，那份友谊能延续好几个人类的一生。" },
+  { id: "dwarf", zh: "矮人", en: "Dwarf", look: "touch", tags: ["stone", "calm", "big"],
+    desc: "矮壮结实，爱打铁爱喝酒，住在山里，特别耐打",
+    lore: "矮人是从大地深处凿出来的民族。他们的城市藏在山腹里，炉火千年不熄，铁锤声日夜回响。矮人记仇，也记恩；酒量深不见底，脾气硬得像他们打的斧头。答应你的事，他们会用一辈子去兑现。" },
+  { id: "halfling", zh: "半身人", en: "Halfling", look: "touch", tags: ["small", "calm", "city"],
+    desc: "小个子，乐观、运气好，关键时刻总能逢凶化吉",
+    lore: "半身人只有常人一半高，却有一颗大得惊人的心。他们热爱美食、炉火和好邻居，日子过得简单快乐。可当冒险找上门来，半身人总能凭着出奇的好运和机灵，从最危险的地方全身而退。" },
+  { id: "gnome", zh: "侏儒", en: "Gnome", look: "touch", tags: ["small", "tech", "arcane"],
+    desc: "小个子，好奇心爆棚，爱搞发明、爱捣鼓魔法",
+    lore: "侏儒的脑袋里装满了问题：星星为什么会闪？这个齿轮能不能再小一点？要是把火球和发条装在一起会怎样？他们是天生的发明家和幻术师，笑声清脆，点子一个接一个。和侏儒同行，日子永远不会无聊——只是偶尔会有点爆炸。" },
+  { id: "dragonborn", zh: "龙裔", en: "Dragonborn", look: "animal", tags: ["fire", "big", "holy"],
+    desc: "龙头人身，能喷龙息（火、冰、电等），很讲荣誉",
+    lore: "龙裔的血脉里流淌着巨龙的骄傲。他们鳞甲覆身、龙首人躯，胸中藏着一口龙息，可以是烈火、寒冰、闪电或毒雾。龙裔把荣誉看得比性命还重——一个龙裔的承诺，就像巨龙的宝藏，谁也别想夺走。" },
+  { id: "tiefling", zh: "提夫林", en: "Tiefling", look: "touch", tags: ["shadow", "fire", "arcane"],
+    desc: "有邪魔血统，长角带尾巴，常被误会，其实未必是坏人",
+    lore: "提夫林的祖先曾与地狱或深渊的邪魔有过牵连，于是他们生来长着犄角、拖着尾巴，眼睛像燃烧的炭火。人们畏惧他们、误解他们，可血统决定不了一个人的心。很多提夫林偏要用一生去证明：邪魔的后裔，也能成为英雄。" },
+  { id: "aasimar", zh: "阿斯莫", en: "Aasimar", look: "touch", tags: ["holy", "sky"],
+    desc: "有天界血统，身上会发光，还能展开光之翅膀",
+    lore: "阿斯莫的灵魂里住着一缕来自天界的光。他们的祖先曾与天使结缘，这份神圣的遗泽代代相传。危急时刻，阿斯莫的双眼会迸出光芒，背后展开光辉的羽翼。他们常在梦里听见天界使者的低语，指引他们守护世间。" },
+  { id: "goliath", zh: "歌利亚", en: "Goliath", look: "touch", tags: ["big", "stone", "wild"],
+    desc: "巨人的后代，又高又壮，热爱挑战极限",
+    lore: "歌利亚是巨人的后代，生活在终年积雪的高山之巅。他们身形魁梧，皮肤上带着岩石般的纹路，从小就在悬崖峭壁间攀爬、角力。对歌利亚来说，人生就是一场接一场的挑战——今天要比昨天更强，这是他们唯一的信条。" },
+  { id: "orc", zh: "兽人", en: "Orc", look: "touch", tags: ["big", "wild"],
+    desc: "体格强壮、意志顽强，被打倒也能硬撑着站起来",
+    lore: "兽人体内燃烧着不屈的火焰。他们肌肉虬结、獠牙外露，在最荒凉的土地上也能顽强地活下去。兽人崇尚力量和坚韧：被击倒了就爬起来，爬起来就再冲上去。他们的忠诚和勇气，比他们的拳头更让人敬畏。" },
+  { id: "halfelf", zh: "半精灵", en: "Half-Elf", look: "human", tags: ["city", "fey"],
+    desc: "人类和精灵的混血，擅长跟各种人打交道（旧版）",
+    lore: "半精灵站在两个世界之间：在人类眼里，他们太过优雅；在精灵眼里，他们又太过匆忙。也许正因为哪边都不完全属于，他们学会了和所有人相处。旅途中最会察言观色、最懂得化解争吵的，常常就是半精灵。" },
+  { id: "halforc", zh: "半兽人", en: "Half-Orc", look: "touch", tags: ["wild", "big"],
+    desc: "人类和兽人的混血，力气大，很难被打倒（旧版）",
+    lore: "半兽人继承了兽人的力量和人类的野心。他们常被人用异样的眼光打量，于是早早学会了用实力说话。半兽人发怒时可怕，忠诚时可靠；就算倒下，他们往往还能咬紧牙关，再撑起一口气。" },
+  { id: "aarakocra", zh: "鸟羽人", en: "Aarakocra", look: "animal", tags: ["sky", "wild"],
+    desc: "鸟人，一出生就能飞，向往天空和自由",
+    lore: "鸟羽人来自云端，羽翼宽阔，鸟喙锋利，生来就属于天空。地面上的城墙和屋顶让他们觉得憋闷，只有乘风盘旋在高空时，他们才感到自由。在鸟羽人眼里，世界是一张从上往下看的地图。" },
+  { id: "bugbear", zh: "熊地精", en: "Bugbear", look: "animal", tags: ["shadow", "big"],
+    desc: "毛茸茸的大块头，手臂超长，意外地擅长偷袭",
+    lore: "熊地精浑身长着粗硬的毛，个头高大，手臂长得出奇。你也许以为这样的大块头会笨手笨脚——直到他悄无声息地出现在你背后。熊地精带着一丝妖精血脉，擅长藏匿和突袭，是天生的伏击者。" },
+  { id: "centaur", zh: "人马", en: "Centaur", look: "animal", tags: ["forest", "wild", "big"],
+    desc: "上半身是人、下半身是马，跑得飞快，热爱原野",
+    lore: "人马上半身是人，下半身是骏马，是原野和森林的孩子。他们奔跑起来快如疾风，蹄声如雷。人马热爱自由和广阔，最厌恶被围墙和笼子困住。在星空下的草原上，他们会唱起祖先传下来的古老歌谣。" },
+  { id: "changeling", zh: "幻身灵", en: "Changeling", look: "human", tags: ["city", "shadow"],
+    desc: "可以随意变换长相，伪装、卧底、骗人都在行",
+    lore: "幻身灵没有固定的面孔。他们可以随心改变五官、发色和嗓音，今天是卖花的老婆婆，明天是城门口的卫兵。正因如此，他们常被人怀疑和提防。但对幻身灵来说，“我是谁”从来不由脸决定，而由选择决定。" },
+  { id: "deepgnome", zh: "地底侏儒", en: "Deep Gnome", look: "touch", tags: ["stone", "small", "shadow"],
+    desc: "住在地底的小个子侏儒，擅长躲藏，和石头融为一体",
+    lore: "地底侏儒生活在幽暗的地下世界，那里危机四伏，于是他们学会了沉默和隐藏。他们的皮肤像岩石一样灰，往石壁前一站就几乎看不见。地底侏儒看起来严肃寡言，但在安全的地方，也会露出侏儒天生的好奇和幽默。" },
+  { id: "duergar", zh: "灰矮人", en: "Duergar", look: "touch", tags: ["stone", "shadow", "arcane"],
+    desc: "地底的灰皮矮人，能突然变大，也能隐身",
+    lore: "灰矮人是困在地底深处的矮人分支，曾被可怕的心灵怪物奴役。他们挣脱了枷锁，却也带回了奇异的力量：能让身体骤然变大，也能隐去身形。灰矮人坚韧而阴郁，心里始终压着一份对自由的执念。" },
+  { id: "eladrin", zh: "雅灵", en: "Eladrin", look: "touch", tags: ["fey", "arcane"],
+    desc: "来自妖精国度的精灵，性格随四季变化，能短距离瞬移",
+    lore: "雅灵是来自妖精荒野的精灵，心情会随四季流转：春天欢快，夏天热烈，秋天温柔，冬天忧伤。他们身上带着妖精国度的魔法，眨眼间就能从一处消失、在另一处出现，像风里旋起的一片花瓣。" },
+  { id: "fairy", zh: "仙灵", en: "Fairy", look: "touch", tags: ["fey", "small", "sky"],
+    desc: "背上长着翅膀的小仙灵，会飞，天生会妖精魔法",
+    lore: "仙灵是妖精荒野里最灵动的小家伙，背生薄翼，在花丛间飞舞。别看他们个子小，妖精魔法可是与生俱来。仙灵天性顽皮好奇，爱恶作剧也爱交朋友——只是他们的“玩笑”，有时会让人哭笑不得。" },
+  { id: "firbolg", zh: "费尔伯格人", en: "Firbolg", look: "touch", tags: ["forest", "calm", "big"],
+    desc: "温和的森林巨人，能和动植物说话，还能短暂隐身",
+    lore: "费尔伯格人是森林里温和的巨人，脸庞宽厚，像一头安静的老牛。他们与草木为伴，听得懂动物和植物的话语，需要时还能让自己隐去身形。费尔伯格人不贪财也不好战，只盼着森林一直是原来的样子。" },
+  { id: "genasi_air", zh: "气元素裔", en: "Air Genasi", look: "touch", tags: ["sky", "arcane"],
+    desc: "体内流着风元素的血，能一直憋气，还能召风",
+    lore: "气元素裔的祖先是风之位面的巨灵。他们的头发总在无风时轻轻飘动，一口气仿佛永远不会用完。气元素裔像风一样难以捉摸，来去自由，心血来潮时说走就走，谁也拦不住。" },
+  { id: "genasi_earth", zh: "土元素裔", en: "Earth Genasi", look: "touch", tags: ["stone", "arcane"],
+    desc: "体内流着土元素的血，在碎石烂泥里也如履平地",
+    lore: "土元素裔的祖先是大地位面的巨灵，皮肤上带着岩石或宝石般的光泽。他们沉稳坚定，脚踏实地，碎石和泥沼对他们来说如履平地。土元素裔话不多，但每一句都像磐石一样掷地有声。" },
+  { id: "genasi_fire", zh: "火元素裔", en: "Fire Genasi", look: "touch", tags: ["fire", "arcane"],
+    desc: "体内流着火元素的血，不怕火，还能操控火焰",
+    lore: "火元素裔的祖先是火焰位面的巨灵，他们的头发像跳动的火苗，皮肤总带着暖意。他们性情炽烈，爱憎分明，热情来得快去得也快。火元素裔不怕火，甚至能把火焰捧在掌心，像捧着一只温顺的小鸟。" },
+  { id: "genasi_water", zh: "水元素裔", en: "Water Genasi", look: "touch", tags: ["water", "calm"],
+    desc: "体内流着水元素的血，能在水下呼吸，还能操控水",
+    lore: "水元素裔的祖先是水之位面的巨灵，皮肤带着海浪般的蓝绿色，能在水下自由呼吸。他们的性子也像水：平静时温柔包容，被激怒时也能掀起惊涛骇浪。大海对他们来说，是另一个家。" },
+  { id: "githyanki", zh: "吉斯洋基人", en: "Githyanki", look: "touch", tags: ["arcane", "wild"],
+    desc: "来自星界的武士民族，好战，天生会心灵能力",
+    lore: "吉斯洋基人是星界的武士民族，祖先曾推翻可怕的灵吸怪，夺回自由。如今他们驾驭着星界飞船、骑着红龙，在银色的虚空里征战四方。吉斯洋基人骄傲好战，天生就能用意念移动物体。" },
+  { id: "githzerai", zh: "吉斯泽莱人", en: "Githzerai", look: "touch", tags: ["arcane", "calm"],
+    desc: "吉斯洋基的兄弟民族，讲究冥想自律，天生会心灵能力",
+    lore: "吉斯泽莱人和吉斯洋基人本是同一个民族，却在推翻灵吸怪之后分道扬镳。他们选择了冥想与自律，在最混乱的位面里修建秩序的堡垒。吉斯泽莱人心如止水，意念之力能护住自身。" },
+  { id: "goblin", zh: "地精", en: "Goblin", look: "touch", tags: ["small", "shadow"],
+    desc: "小个子、动作快，打一下就溜，天生捣蛋鬼",
+    lore: "地精个子小、耳朵尖，眼睛在黑暗里闪闪发亮。他们手脚麻利，打完就跑，最擅长趁人不注意搞点小动作。地精常被当成怪物，可一个机灵的地精冒险者，往往是队伍里最能出奇制胜的那个。" },
+  { id: "harengon", zh: "兔人", en: "Harengon", look: "animal", tags: ["small", "fey"],
+    desc: "兔子人，反应超快，能跳很远",
+    lore: "兔人来自妖精荒野，长着长长的耳朵和一双有力的后腿。他们的反应快得惊人，总能比危险早一步跳开。兔人天性乐观、热爱自由，脚底下像装了弹簧，走到哪里都带着一阵轻快的风。" },
+  { id: "hobgoblin", zh: "大地精", en: "Hobgoblin", look: "touch", tags: ["city", "fey"],
+    desc: "讲纪律、重团队，越是帮队友越能发挥",
+    lore: "大地精讲纪律、重荣誉，军团般的秩序刻在骨子里。他们相信，一个人再强，也比不过一支团结的队伍。大地精身上带着一丝妖精魔法，当他们出手帮助同伴时，好运也会随之降临。" },
+  { id: "kenku", zh: "天狗", en: "Kenku", look: "animal", tags: ["shadow", "city"],
+    desc: "乌鸦般的鸟人，能模仿任何听过的声音，记性超好",
+    lore: "天狗长着乌鸦般的黑羽和尖喙，能模仿听过的任何声音：铃声、雨声、别人说话的腔调。他们记性惊人，过目不忘。传说天狗曾失去了自己的声音，所以总在借用别人的——这让他们显得神秘，又有点让人不安。" },
+  { id: "kobold", zh: "狗头人", en: "Kobold", look: "animal", tags: ["small", "stone", "fire"],
+    desc: "小小的龙族亲戚，喜欢群居，会大吼吓唬敌人",
+    lore: "狗头人是矮小的爬虫族群，自认是巨龙的远亲，对龙怀着近乎崇拜的敬畏。单个狗头人也许不起眼，但他们擅长抱团、设陷阱和出奇制胜。狗头人尖声一吼，能把比自己大好几倍的敌人吓一跳。" },
+  { id: "lizardfolk", zh: "蜥蜴人", en: "Lizardfolk", look: "animal", tags: ["water", "wild"],
+    desc: "冷血的蜥蜴人，能憋气、能咬人，想法非常实际",
+    lore: "蜥蜴人生活在沼泽深处，冷血也冷静，看世界的方式极其实际：能吃吗？有用吗？危险吗？他们不太懂人情世故，却能潜在水下很久，一口利齿和一身厚鳞让他们在荒野里所向披靡。" },
+  { id: "minotaur", zh: "牛头人", en: "Minotaur", look: "animal", tags: ["big", "wild"],
+    desc: "牛头人身，能用角把敌人撞飞",
+    lore: "牛头人长着雄壮的牛首和弯角，体格如山。他们冲锋起来势不可挡，一对犄角能把敌人撞飞出去。据说牛头人天生认得路，在迷宫里也永远不会迷失方向。他们勇猛直率，最瞧不起背后耍手段的人。" },
+  { id: "satyr", zh: "半羊人", en: "Satyr", look: "touch", tags: ["fey", "city"],
+    desc: "羊角羊腿的妖精，爱音乐爱派对，跳得特别高",
+    lore: "半羊人上半身似人，下半身是毛茸茸的羊腿，头顶一对弯角。他们来自妖精荒野，热爱音乐、美酒和派对，人生信条就是“尽兴”。半羊人跳得又高又远，对魔法也有天生的抵抗力。" },
+  { id: "seaelf", zh: "海精灵", en: "Sea Elf", look: "touch", tags: ["water", "fey"],
+    desc: "住在海里的精灵，能水下呼吸，能和海洋生物交流",
+    lore: "海精灵的祖先是很久以前爱上大海的精灵。他们在珊瑚与海藻间筑起城市，与鱼群和海豚为伴，能在水下自由呼吸。陆地对他们来说是新奇的远方，正如大海对陆地居民一样。" },
+  { id: "shadarkai", zh: "影灵", en: "Shadar-kai", look: "touch", tags: ["shadow", "fey"],
+    desc: "来自阴影世界的精灵，能短距离瞬移，带点阴郁气质",
+    lore: "影灵是生活在堕影冥界的精灵，那是一个灰暗、寂静、连色彩都会褪去的世界。漫长的岁月让他们的气质染上一层阴郁和冷淡。影灵能在阴影之间瞬间穿梭，仿佛自己也是一道影子。" },
+  { id: "shifter", zh: "化兽者", en: "Shifter", look: "touch", tags: ["wild", "forest"],
+    desc: "有野兽血统，战斗时能短暂变得更像野兽",
+    lore: "化兽者的祖先与狼人、熊人这类兽化人有着血缘，于是他们身上留着野兽的影子：锐利的眼神、浓密的毛发、灵敏的嗅觉。战斗时，化兽者能短暂唤醒体内的野兽，变得更凶猛、更敏捷。" },
+  { id: "tabaxi", zh: "斑猫人", en: "Tabaxi", look: "animal", tags: ["wild", "shadow"],
+    desc: "猫人，好奇心旺盛，爬墙飞快，爆发起来跑得超快",
+    lore: "斑猫人身形修长，长着猫的面孔和斑纹皮毛。他们的好奇心比猫还旺盛：故事、宝物、秘密，任何新奇的东西都会让他们两眼放光。斑猫人爬墙如履平地，一时兴起能跑得飞快，跑完又懒洋洋地趴下打盹。" },
+  { id: "tortle", zh: "龟人", en: "Tortle", look: "animal", tags: ["water", "calm"],
+    desc: "背着壳的乌龟人，天生防御高，性格悠闲",
+    lore: "龟人背着一面厚重的甲壳，走到哪里，家就在哪里。他们生性悠闲，热爱旅行，喜欢在海边慢慢看日出日落。龟人的一生并不长，所以他们格外珍惜每一段旅程——慢一点，才能走得远。" },
+  { id: "triton", zh: "梭螺鱼人", en: "Triton", look: "touch", tags: ["water", "holy"],
+    desc: "深海来的守护者，能水下呼吸，有点小骄傲",
+    lore: "梭螺鱼人是深海的守护者，世世代代守卫着海底，抵御来自深渊的邪恶。他们能在水下呼吸，能和海洋生物交谈。刚上岸的梭螺鱼人常常带着一点高傲和天真，不太习惯陆地居民的“无知”。" },
+  { id: "yuanti", zh: "蛇人", en: "Yuan-ti", look: "touch", tags: ["shadow", "arcane"],
+    desc: "带蛇类特征的人，天生抗魔法、抗毒",
+    lore: "蛇人身上带着蛇的印记：鳞片、竖瞳，或是分叉的舌头。传说他们的祖先为了追求力量，向蛇神献上了自己的人性。如今的蛇人冒险者天生抗毒抗魔，冷静得让人发毛，正努力写下与祖先不同的故事。" },
+  { id: "loxodon", zh: "象族", en: "Loxodon", look: "animal", tags: ["big", "calm"],
+    desc: "大象人，沉稳睿智，鼻子能拿东西",
+    lore: "象族长着大象的面容和长鼻，身材高大，性情沉稳。他们以平和与智慧闻名，记性好得惊人，能把整部史诗一字不差地背下来。象族的长鼻灵活如手，厚实的皮肤也像一层天然的铠甲。" },
+  { id: "vedalken", zh: "维多肯", en: "Vedalken", look: "touch", tags: ["arcane", "calm", "tech"],
+    desc: "蓝皮肤，冷静理性，做什么都追求完美",
+    lore: "维多肯有着蓝色的皮肤和冷静的头脑，他们相信世间万物都还有改进的空间。在维多肯眼里，失败只是下一次成功的数据。他们追求的不是完美本身，而是一点点逼近完美的那个过程。" },
+  { id: "simic", zh: "析米克混生体", en: "Simic Hybrid", look: "alien", tags: ["water", "tech"],
+    desc: "被魔法改造过的人，身上嫁接了动物特征",
+    lore: "析米克混生体是魔法与生物实验的产物：人的身体上嫁接了动物的特征，也许是滑翔用的翼膜、带吸盘的触手，也许是甲壳和夜视的眼睛。他们是活生生的“进化”，每一个混生体都独一无二。" },
+  { id: "leonin", zh: "狮族", en: "Leonin", look: "animal", tags: ["wild", "big"],
+    desc: "狮子人，骄傲威猛，一声咆哮能吓住敌人",
+    lore: "狮族是骄傲的草原猎手，长着狮子的面孔和鬃毛。他们以部族为家，崇尚勇气和自立。狮族一声咆哮，足以让敌人心胆俱裂；当他们奔跑在金色的草原上时，就像一束燃烧的阳光。" },
+  { id: "owlin", zh: "枭人", en: "Owlin", look: "animal", tags: ["sky", "shadow", "arcane"],
+    desc: "猫头鹰人，能飞，夜里看得清，动作悄无声息",
+    lore: "枭人长着猫头鹰般的羽毛和一双大眼睛，夜色中也能看清一切。他们振翅时几乎没有声音，常常像幽灵一样从高处滑翔而下。枭人好学睿智，又带着一点夜行动物特有的神秘。" },
+  { id: "astralelf", zh: "星界精灵", en: "Astral Elf", look: "touch", tags: ["arcane", "holy", "sky"],
+    desc: "住在星界的精灵，身上带着星光",
+    lore: "星界精灵是很久以前离开大地、移居星界的精灵。在那片时间几乎静止的银色虚空里，他们身上沾染了星辰的光辉。星界精灵的眼中闪着星光，他们见过的世界，比任何人都多。" },
+  { id: "autognome", zh: "自动侏儒", en: "Autognome", look: "alien", tags: ["tech", "small"],
+    desc: "侏儒造出来的小机器人，有了自己的意识",
+    lore: "自动侏儒是侏儒发明家造出来的机械小人，原本只是帮手或玩具，却不知从哪天起有了自己的意识。他们靠齿轮、发条和魔法运转，好奇地打量着这个世界，努力弄明白“活着”到底是什么感觉。" },
+  { id: "giff", zh: "诘弗人", en: "Giff", look: "animal", tags: ["big", "tech"],
+    desc: "河马人，体格魁梧，热爱火药和军队生活",
+    lore: "诘弗人长着河马般的大脑袋和魁梧的身躯，是星界里出了名的雇佣兵。他们热爱军队生活、纪律，还有……火药。诘弗人嗓门大、讲礼数，打起仗来却像一辆横冲直撞的战车。" },
+  { id: "hadozee", zh: "鼯猴人", en: "Hadozee", look: "animal", tags: ["sky", "water"],
+    desc: "像猴子的种族，能张开手臂下的膜滑翔，常在船上当水手",
+    lore: "鼯猴人长得像猴子，手臂和身体之间有一层皮膜，张开就能滑翔。他们手脚灵活，天生是攀爬和航海的好手，常在星界飞船和海船上当水手。鼯猴人热情又爱冒险，最喜欢从高处纵身一跃的感觉。" },
+  { id: "plasmoid", zh: "流浆体", en: "Plasmoid", look: "alien", tags: ["water", "shadow"],
+    desc: "一团有意识的软泥，能变形，能挤过很窄的缝",
+    lore: "流浆体是一团有意识的软泥，没有骨头，也没有固定的形状。他们可以伸出触手般的“手臂”，也能把自己挤进一道细缝。流浆体看世界的方式和谁都不一样，常常对人类的习俗既困惑又好奇。" },
+  { id: "thrikreen", zh: "螳螂人", en: "Thri-kreen", look: "alien", tags: ["wild", "calm"],
+    desc: "像螳螂的虫人，四只手臂，不用睡觉，会心灵感应",
+    lore: "螳螂人是长着四只手臂的虫族，甲壳会随环境变色。他们从不睡觉，只需要静静休息；他们不靠嘴说话，而是用心灵感应交流。螳螂人看起来冷漠，其实对同伴极其忠诚，会把队友当成自己的族群。" },
+  { id: "kender", zh: "坎德人", en: "Kender", look: "touch", tags: ["small", "city"],
+    desc: "小个子，天不怕地不怕，好奇心重，嘴特别会气人",
+    lore: "坎德人个子小小，天不怕地不怕，好奇心重得没边。别人的口袋、上锁的箱子、禁止入内的房间，在他们看来都像是一封邀请函。坎德人那张嘴更厉害，一句话就能把对手气得跳脚，露出破绽。" },
+  { id: "warforged", zh: "战俑", en: "Warforged", look: "alien", tags: ["tech", "big", "calm"],
+    desc: "为战争制造的活体魔像，有了自我意识，正在寻找人生意义",
+    lore: "战俑是为一场漫长战争制造的活体魔像，由木头、金属和石头组成，体内燃着魔法的火花。战争结束了，他们却留了下来，带着自我意识和一身伤痕。战俑不吃不睡，却在努力学一件比打仗更难的事：怎样生活。" },
+  { id: "kalashtar", zh: "离梦人", en: "Kalashtar", look: "human", tags: ["arcane", "holy", "calm"],
+    desc: "人类和梦境灵体结合而成，会心灵感应，沉静神秘",
+    lore: "离梦人是人类与来自梦境之界的灵体结合而成的族群。他们的梦里住着另一个灵魂，与他们分享记忆和智慧。离梦人宁静而深邃，能用心灵与人交谈，一生都在对抗那片想要吞噬梦境的黑暗。" },
+  { id: "khoravar", zh: "科拉瓦", en: "Khoravar", look: "human", tags: ["fey", "city"],
+    desc: "精灵和人类血脉交融而成的民族，天生会牵线搭桥",
+    lore: "科拉瓦是艾伯伦世界里精灵与人类血脉交融的后裔，经过许多代人，已经成为一个独立的民族。他们身上带着一丝妖精般的灵动，善于在不同的人群之间牵线搭桥，是交易、外交和情报网里少不了的人物。" },
+  { id: "verdan", zh: "佛丹人", en: "Verdan", look: "touch", tags: ["arcane", "city"],
+    desc: "绿皮肤的小个子，会心灵感应，身体会随成长不断变化",
+    lore: "佛丹人是一个年轻的种族，皮肤是绿色的，耳朵又尖又长，据说诞生于一场混沌魔法的意外。他们的身体会随着成长不断变化，个子也会越长越高。佛丹人天生会心灵感应，总想弄明白自己从哪里来。" },
+  { id: "dhampir", zh: "半血裔", en: "Dhampir", look: "human", tags: ["shadow", "wild"],
+    desc: "半吸血鬼，能飞檐走壁，咬人还能恢复体力",
+    lore: "半血裔身上流着吸血鬼的血，却仍是活人。他们苍白而优雅，能像蜘蛛一样贴着墙壁行走，一口咬下去还能从敌人身上汲取力量。半血裔一生都在与体内的饥渴较量——是成为怪物，还是成为猎杀怪物的人？" },
+  { id: "hexblood", zh: "巫咒之子", en: "Hexblood", look: "touch", tags: ["shadow", "fey", "arcane"],
+    desc: "和鬼婆（古老的女巫）有过契约的人，能下咒，也能变装",
+    lore: "巫咒之子与鬼婆——一种古老而邪异的女巫——之间有过某种约定，从此身上出现了奇异的印记。他们能施下诅咒、改换容貌，还能把自己的一缕头发当作信物交给别人，隔着很远传递心意。他们身上总带着一点童话故事里的诡异魅力。" },
+  { id: "lupin", zh: "人狼裔", en: "Lupin", look: "animal", tags: ["wild", "forest", "shadow"],
+    desc: "像狼人一样的种族，会嚎叫，扑倒敌人是拿手好戏",
+    lore: "人狼裔是带着狼人血脉的族群，长着狼的面孔和锋利的爪牙。他们嗅觉灵敏，听觉过人，一声长嚎能让同伴振奋、让敌人胆寒。猛地扑倒猎物、咬住不放，是他们最拿手的战斗方式。" },
+  { id: "reborn", zh: "复生者", en: "Reborn", look: "touch", tags: ["shadow", "tech", "calm"],
+    desc: "死而复生的人，记忆残缺，不需要吃喝睡觉",
+    lore: "复生者曾经死去，又被某种力量带回人间——也许是死灵法术，也许是一场无法解释的奇迹。他们的记忆支离破碎，身体不再需要食物和睡眠。复生者带着一个问题行走世间：我是谁？我为什么会回来？" },
+  { id: "duskling", zh: "暮精", en: "Duskling", look: "touch", tags: ["fey", "arcane", "small"],
+    desc: "离开妖精国度的流浪民族，能随时调整自己的魔法天赋（2026年新物种）",
+    lore: "暮精是离开妖精荒野的游牧民族，赶着畜群在各个位面之间迁徙。妖精的魔法仍在他们体内流淌，让他们可以随时调换自己的天赋：今天力大如牛，明天心思敏捷。暮精从小就爱玩大胆的游戏，蹦跳起来又高又远。" }
+];
+
+QUIZ.backgrounds = [
+  { id: "acolyte",     zh: "侍僧",   en: "Acolyte",     desc: "在神殿里长大，侍奉神明" },
+  { id: "artisan",     zh: "工匠",   en: "Artisan",     desc: "手艺人，做东西是你的本行" },
+  { id: "charlatan",   zh: "骗子",   en: "Charlatan",   desc: "靠假身份和花言巧语混饭吃" },
+  { id: "criminal",    zh: "罪犯",   en: "Criminal",    desc: "以前在道上混，开锁偷东西是基本功" },
+  { id: "entertainer", zh: "艺人",   en: "Entertainer", desc: "唱歌、跳舞、杂耍，走到哪演到哪" },
+  { id: "farmer",      zh: "农民",   en: "Farmer",      desc: "种地出身，吃苦耐劳，身体结实" },
+  { id: "guard",       zh: "警卫",   en: "Guard",       desc: "以前站岗放哨，眼观六路耳听八方" },
+  { id: "guide",       zh: "向导",   en: "Guide",       desc: "熟悉荒野的路，给人带路为生" },
+  { id: "hermit",      zh: "隐士",   en: "Hermit",      desc: "独自隐居多年，想通了很多事" },
+  { id: "merchant",    zh: "商人",   en: "Merchant",    desc: "做买卖的，会算账也会砍价" },
+  { id: "noble",       zh: "贵族",   en: "Noble",       desc: "出身名门，有钱有地位，也有包袱" },
+  { id: "sage",        zh: "智者",   en: "Sage",        desc: "埋头读书做研究，知识渊博" },
+  { id: "sailor",      zh: "水手",   en: "Sailor",      desc: "在船上讨生活，见过大风大浪" },
+  { id: "scribe",      zh: "抄写员", en: "Scribe",      desc: "替人写字抄书，心细如发" },
+  { id: "soldier",     zh: "士兵",   en: "Soldier",     desc: "上过战场，受过军事训练" },
+  { id: "wayfarer",    zh: "流浪者", en: "Wayfarer",    desc: "在街头长大，四处漂泊，靠自己活下来" }
+];
+
+QUIZ.alignAxes = {
+  lc: "守序 ↔ 混乱：你怎么看待规矩、传统和承诺。守序的人相信规则带来秩序，混乱的人觉得自由比规则重要。",
+  ge: "善良 ↔ 邪恶：你怎么对待别人。善良的人愿意为别人付出，邪恶的人会为了自己去伤害别人。"
+};
+
+QUIZ.alignments = {
+  "LG": { zh: "守序善良", en: "Lawful Good", desc: "心中有一把尺，永远站在弱者那边",
+    lore: "你相信，好的规矩能保护好人。你信守承诺、尊重律法，但守规矩不是因为怕受罚，而是因为你相信秩序能让更多人过上好日子。当律法和正义起了冲突，你会想办法去纠正律法，而不是假装没看见。",
+    like: "《三侠五义》里的包公：铁面无私、按律办案，却处处为百姓做主。" },
+  "NG": { zh: "中立善良", en: "Neutral Good", desc: "不管规矩怎么说，帮人就是帮人",
+    lore: "你只在乎一件事：这么做能不能帮到人？规矩有用，你就遵守；规矩碍事，你也不会死守。你不图名声，也不在乎站哪一边，只要眼前有人需要帮忙，你就会伸出手。",
+    like: "神医华佗：不问贵贱、不论敌我，谁病了就给谁治。" },
+  "CG": { zh: "混乱善良", en: "Chaotic Good", desc: "心地善良，但最讨厌被人管",
+    lore: "你有一副热心肠，却最受不了被人管。在你看来，规矩和权势常常是欺负弱者的工具。你会为了正义打破规则，为了自由挑战权威，凭着良心行事，想帮谁就帮谁。",
+    like: "《水浒传》里的鲁智深：路见不平，拳打镇关西，大闹野猪林。" },
+  "LN": { zh: "守序中立", en: "Lawful Neutral", desc: "规矩和承诺比什么都重要",
+    lore: "对你来说，规矩、传统和承诺是一切的根基。你不一定站在善良这边，也不会站到邪恶那边——你站在“规矩”这边。说出口的话一定兑现，接下的任务一定完成，哪怕结果不讨人喜欢。",
+    like: "《白蛇传》里的法海：在他眼里人妖殊途，天规就是天规。" },
+  "N": { zh: "绝对中立", en: "True Neutral", desc: "随遇而安，不偏不倚",
+    lore: "你不偏不倚，也不想被任何立场绑住。善与恶、秩序与混乱，在你看来都有道理，也都有局限。你更愿意顺其自然、保持平衡，只在必要的时候，做你认为该做的那一件事。",
+    like: "庄子：看淡是非对错，只求逍遥自在。" },
+  "CN": { zh: "混乱中立", en: "Chaotic Neutral", desc: "自由第一，想到哪做到哪",
+    lore: "自由是你最珍视的东西。你不想被规矩束缚，也不想为谁的正义买单，只想按自己的心意过活。你未必坏，也未必好，你只是……随性。所以你的伙伴永远猜不到你下一步要干什么。",
+    like: "大闹天宫时的孙悟空：天庭的规矩不管，玉帝的面子不给，只图一个痛快。" },
+  "LE": { zh: "守序邪恶", en: "Lawful Evil", desc: "有野心也有手段，但守自己的规矩",
+    lore: "你有野心，也有手腕。你懂得利用规矩、等级和秩序来达成目的，为此不择手段，但讲究章法。你未必会随便伤人，可如果有人挡了你的路，你会让他“按规矩”消失。",
+    like: "《三国演义》里的曹操：赏罚分明、手腕高超，为了霸业可以不择手段。" },
+  "NE": { zh: "中立邪恶", en: "Neutral Evil", desc: "只为自己打算，谁也别挡路",
+    lore: "你只为自己打算。规矩有用就利用，没用就无视；别人的痛苦，与你无关。你不一定张扬，甚至可能笑容可掬，但心里只有一本算计自己好处的账。",
+    like: "秦桧：表面恭顺，暗地里为了自己的荣华富贵陷害忠良。" },
+  "CE": { zh: "混乱邪恶", en: "Chaotic Evil", desc: "一切都无所谓，乱起来才好玩",
+    lore: "你被欲望和冲动驱使，破坏和混乱让你感到快活。规矩你不在乎，别人你也不在乎，想做什么就做什么。这样的角色很难和队友相处，玩之前一定要和主持人好好商量。",
+    like: "《三国演义》里的董卓：残暴无度，火烧洛阳，想怎样就怎样。" }
+};
+
+// 三段剧情过渡（在第 1、11、21 题前出现），每次随机挑一段
+QUIZ.stages = [
+  { at: 0, title: "第一章 · 平凡的一天", texts: [
+    "先从你自己的生活说起。凭第一感觉选就好，没有标准答案。",
+    "这只是热身。选最像你的那个，不用想太多。"
+  ]},
+  { at: 10, title: "第二章 · 穿越", texts: [
+    "你一觉醒来，窗外传来马蹄声和叫卖声。你好像……穿越到了一个中世纪小镇。",
+    "地铁门一开，外面不是站台，而是一条铺着石板的小街。你回头，车厢已经不见了……",
+    "你打游戏打到睡着，醒来时桌上的电脑变成了一盏油灯，窗外有人骑着马经过……"
+  ]},
+  { at: 20, title: "第三章 · 冒险开始", texts: [
+    "你在小镇站稳了脚跟，还认识了一群伙伴。这天，冒险者公会贴出了一张委托……",
+    "公会柜台的大姐递给你一块木牌：“恭喜，你现在是正式冒险者了。”第一个任务，马上开始。"
+  ]}
+];
+
+// ===== 题位 =====
+// 每个题位有一组固定的计分（fx，对应四个选项），和三个不同的问法（v）。
+// 每次测验，每个题位随机抽一个问法，选项顺序也会打乱。
+// fx 里：c 职业 / s 气质 / l 外形 / b 背景 / a 阵营（lc 守序+ 混乱-，ge 善良+ 邪恶-）
+// 某个问法的选项如果要用不同的计分，可以写成 { t: "选项", fx: {...} }
+QUIZ.slots = [
+  // ---------- 第一章：日常 ----------
+  { fx: [
+      { c: { barbarian: 2, fighter: 2, monk: 1 }, s: { big: 1 } },
+      { c: { wizard: 2, artificer: 1 }, b: { hermit: 1 } },
+      { c: { bard: 2, sorcerer: 1, warlock: 1 }, b: { entertainer: 1 } },
+      { c: { druid: 2, ranger: 2 } } ],
+    v: [
+      ["周末早上醒来，你第一件想做的事是？", "去运动，出一身汗", "窝在家看书、刷知识视频", "约朋友出去玩、唱 K", "去郊外爬山，看看花草"],
+      ["突然多出一天假，你会怎么过？", "去健身房，或者约人打一场球", "去图书馆或博物馆泡一整天", "约上一群朋友吃饭聚会", "一个人去山里或者林子里走走"],
+      ["下班路上看到一家新开的店，你最可能走进哪种？", "拳击馆或攀岩馆", "二手书店", "有现场演出的小酒馆", "卖多肉和盆栽的花店"]
+    ]},
+  { fx: [
+      { s: { forest: 2 } },
+      { s: { water: 2 } },
+      { s: { city: 2 } },
+      { s: { stone: 2 } } ],
+    v: [
+      ["放假出去玩，你最想去哪？", "森林露营", "海边", "市中心，逛街吃好吃的", "爬山，或者钻山洞探险"],
+      ["你理想中的家在哪里？", "林子边上的小木屋", "推开窗就是大海", "热闹的市中心公寓", "山脚下，后院连着一个山洞"],
+      ["手机壁纸你会选哪张？", "晨雾里的森林", "深蓝色的海浪", "夜晚的城市灯火", "雪山和峡谷"]
+    ]},
+  { fx: [
+      { a: { ge: 2, lc: 1 } },
+      { a: { ge: 0 } },
+      { a: { ge: -1, lc: -1 } },
+      { a: { ge: -2 } } ],
+    v: [
+      ["在路边捡到一个鼓鼓的钱包，你会？", "原封不动交给警察", "联系失主，顺便要点感谢费", "把钱抽出来，钱包扔进邮筒", "全部收下，老天给的"],
+      ["自动售货机坏了，一下掉出来十瓶饮料，你会？", "联系店家，把多的还回去", "拿一瓶，剩下的放回去", "拍视频发群里，叫朋友都来拿", "全部带走，回头拿去卖"],
+      ["同事犯了个错，领导却以为是你干的。你会？", "解释清楚，也帮同事说两句好话", "只把事实说清楚，别的不管", "先不吭声，回头找机会给他使个绊子", "当众把同事供出来，再添油加醋"]
+    ]},
+  { fx: [
+      { c: { paladin: 2, fighter: 1 }, a: { lc: 1 } },
+      { c: { cleric: 2, bard: 1 }, a: { ge: 1 } },
+      { c: { artificer: 2, wizard: 1 }, s: { tech: 1 } },
+      { c: { rogue: 2, warlock: 1, sorcerer: 1 } } ],
+    v: [
+      ["小组作业里，你通常负责什么？", "带头分工，扛起大局", "帮大家查漏补缺，照顾大家情绪", "做最难的技术部分", "能摸鱼就摸鱼，关键时刻一招翻盘"],
+      ["朋友搬家，你会帮什么忙？", "指挥大家分工，自己扛最重的箱子", "照顾大家吃喝，给累坏的人递水", "拆装家具、接电线，技术活交给我", "负责跟房东砍价，找便宜的搬家公司"],
+      ["公司年会要出节目，你会？", "站出来组织大家排练", "在后台给大家打气、帮忙补妆", "做灯光音响，顺便写个抽奖程序", "偷偷准备一个惊喜，最后压轴登场"]
+    ]},
+  { fx: [
+      { b: { artisan: 2 } },
+      { b: { sage: 2, scribe: 1 } },
+      { b: { entertainer: 2, charlatan: 1 } },
+      { b: { merchant: 2, noble: 1 } } ],
+    v: [
+      ["如果不用考虑钱，你最想做哪份工作？", "手艺人或设计师", "研究员或图书管理员", "演员、歌手或主播", "自己当老板做生意"],
+      ["你最可能搞的副业是？", "做手工、修东西", "写科普、做翻译", "直播唱歌或者讲段子", "倒腾二手货，低买高卖"],
+      ["逛展会时，你最容易在哪个展台停下来？", "手作木工和皮具", "古籍和老地图", "魔术和街头表演", "名表、珠宝和古董拍卖"]
+    ]},
+  { fx: [
+      { s: { small: 2, fey: 1 } },
+      { s: { calm: 2 } },
+      { s: { fire: 2, wild: 1 } },
+      { s: { shadow: 2, arcane: 1 } } ],
+    v: [
+      ["朋友最常用哪个词形容你？", "可爱", "靠谱", "热情", "神秘"],
+      ["你最喜欢哪个季节？", "春天，花开了，小动物都出来玩", "秋天，安安静静，天高气爽", "夏天，太阳越大越开心", "冬天的夜晚，长夜、雪和星星"],
+      ["聚会上你通常是什么角色？", "大家都想捏捏脸的开心果", "默默照顾全场的那个人", "带动气氛、嗓门最大的那个", "坐在角落，偶尔说一句就让人回味半天"]
+    ]},
+  { fx: [
+      { a: { lc: 2 }, b: { guard: 1 } },
+      { a: { lc: 1 } },
+      { a: { lc: -1 } },
+      { a: { lc: -2 } } ],
+    v: [
+      ["半夜十二点，路口红灯，周围一辆车都没有，你会？", "等绿灯，规则就是规则", "看情况，大概会等吧", "左右看看，直接走", "红灯？我从来不看"],
+      ["公司规定必须打卡，但你的活早就干完了。你会？", "规定就是规定，照常打卡", "一般会打，偶尔忘了也无所谓", "能找人帮忙打就找人打", "打卡？我上班全凭心情"],
+      ["玩桌游时，有人想加一条说明书里没有的“自创规则”，你会？", "按说明书来，规则就是规则", "先查查说明书，大家都同意就用", "好玩就行，管它说明书写什么", "好主意！我再加三条"]
+    ]},
+  { fx: [
+      { c: { barbarian: 2, fighter: 1, monk: 1 } },
+      { c: { wizard: 2, artificer: 1 } },
+      { c: { sorcerer: 2, bard: 1 } },
+      { c: { rogue: 2, warlock: 2 } } ],
+    v: [
+      ["遇到一个很难的难关，你的习惯是？", "硬刚，一次不行就十次", "查资料、找规律，慢慢研究", "凭感觉，等灵光一闪", "找条捷径，或者找人“走后门”"],
+      ["考试前一天晚上，你在干什么？", "熬夜刷题，刷到会为止", "整理笔记，画好思维导图", "啥也没干，相信自己考场上会灵光一闪", "到处打听往年真题和“重点”"],
+      ["玩一个新游戏，你的风格是？", "不看教程，直接开打", "先把攻略和设定全研究一遍", "跟着感觉走，乱按也能赢", "专门找 bug，研究怎么钻空子"]
+    ]},
+  { fx: [
+      { b: { scribe: 2, acolyte: 1, sage: 1 } },
+      { b: { farmer: 2, guide: 1, wayfarer: 1 } },
+      { b: { noble: 2, soldier: 1 } },
+      { b: { criminal: 2, charlatan: 1 } } ],
+    v: [
+      ["你小时候是个怎样的孩子？", "规规矩矩的好学生", "天天在外面野，带一身泥回家", "孩子王，小伙伴都听你的", "调皮捣蛋，老师的重点关注对象"],
+      ["小时候的暑假，你大多在干什么？", "在家写作业、练字", "回乡下爷爷奶奶家，抓鱼摸虾", "当孩子王，带着一帮小孩满街跑", "跟着大孩子混，学了不少“歪门邪道”"],
+      ["学生时代，你最像班里的哪种人？", "课代表，作业本永远最工整", "下课铃一响就冲出教室的那个", "班长，大家有事都来找你", "坐在最后一排的“人才”"]
+    ]},
+  { fx: [
+      { l: { human: 4 } },
+      { l: { touch: 4 } },
+      { l: { animal: 4 } },
+      { l: { alien: 4 } } ],
+    v: [
+      ["如果能换一个外形过一天，你选？", "普通人的样子，好看点就行", "有点特别：尖耳朵、头上长角、皮肤带点颜色", "动物的样子：毛茸茸的，或者带羽毛、鳞片", "越怪越好：机器人、一团软泥、大虫子"],
+      ["游戏里捏脸，你会先点开哪一栏？", "人类：就捏一个好看点的自己", "异族：尖耳朵、犄角、彩色皮肤", "动物族：狼头、猫脸、鸟喙或者一身鳞片", "奇异族：机器人、果冻、甲虫，越怪越好"],
+      ["万圣节变装派对，你会扮成什么？", "穿礼服或盔甲的普通人", "小恶魔或精灵：戴犄角、贴尖耳朵", "一只狼、一只猫或一只鸟，全身毛茸茸", "一台机器人，或者一只外星虫子"]
+    ]},
+
+  // ---------- 第二章：穿越 ----------
+  { fx: [
+      { c: { fighter: 2, paladin: 1, barbarian: 1 } },
+      { c: { ranger: 2, fighter: 1 } },
+      { c: { wizard: 2, cleric: 1 } },
+      { c: { artificer: 2, rogue: 1 }, s: { tech: 1 } } ],
+    v: [
+      ["穿越时你身上只能带一样东西，你选？", "一把好刀", "一副弓箭", "一本百科全书", "一个工具箱"],
+      ["镇上的铁匠铺在打折，你挑了什么？", "一把沉甸甸的长剑", "一把轻便的猎弓", "一本铁匠自己都看不懂的古书", "一套精细的锉刀和齿轮"],
+      ["穿越过来后，你身上的现代物品变成了什么？", "手里的雨伞变成了一把长剑", "耳机线变成了一根结实的弓弦", "手机变成了一本会自己翻页的书", "充电宝变成了一个嗡嗡作响的小机关"]
+    ]},
+  { fx: [
+      { s: { forest: 2, fey: 1 } },
+      { s: { stone: 2 } },
+      { s: { sky: 2, wild: 1 } },
+      { s: { city: 2, water: 1 } } ],
+    v: [
+      ["你在哪里醒来？", "大树上的树屋", "山里的地下城市", "悬崖顶上的鸟巢", "热闹的港口"],
+      ["镇上有人问你从哪来，你随口编了个家乡：", "“森林深处的精灵村子”", "“大山底下的矿工城”", "“云端的高山部落”", "“海边的大港城”"],
+      ["你在小镇租房，最想要哪一间？", "爬满藤蔓的阁楼，窗外就是树林", "地下室，冬暖夏凉", "钟楼顶层，风很大，看得最远", "码头边的旅馆，天天能听见海鸥叫"]
+    ]},
+  { fx: [
+      { b: { acolyte: 2 } },
+      { b: { guard: 2, soldier: 1 } },
+      { b: { sailor: 2 } },
+      { b: { guide: 2 } } ],
+    v: [
+      ["为了在小镇活下去，你先找了份什么活？", "在神殿里帮忙", "当城门守卫", "去码头搬货，跟船出海", "给商队当野外向导"],
+      ["镇上布告栏贴着几张招工启事，你揭下了哪张？", "“神殿招杂役，管吃管住”", "“城防队招新兵”", "“商船缺水手，下周出海”", "“商队招熟悉山路的向导”"],
+      ["你第一个月的工钱是怎么挣来的？", "替神殿抄经、打扫圣坛", "夜里巡街、看守仓库", "在渔船上收网", "带外地人进山采药"]
+    ]},
+  { fx: [
+      { a: { ge: 2 } },
+      { a: { lc: 1, ge: 1 } },
+      { a: { ge: -1 } },
+      { a: { ge: -2, lc: -1 } } ],
+    v: [
+      ["集市上，一个小孩偷了面包被店主抓住，店主要打他。你会？", "替孩子付钱，再请他吃顿饭", "劝店主把孩子交给守卫处理", "不关我的事，走开", "趁乱也顺走一个面包"],
+      ["一个受伤的陌生旅人倒在你门口，你会？", "扶进屋里，把自己的床让给他", "去叫镇上的医生和守卫来", "关上门，免得惹麻烦", "先翻翻他的行李再说"],
+      ["你捡到一只别人家走丢的小龙宝宝，你会？", "挨家挨户帮它找主人", "交给冒险者公会登记招领", "自己偷偷养着，当没看见寻物启事", "拿到黑市卖个好价钱"]
+    ]},
+  { fx: [
+      { c: { barbarian: 2, paladin: 2, fighter: 1 }, a: { ge: 1 } },
+      { c: { rogue: 2, monk: 2, ranger: 1 } },
+      { c: { bard: 2, sorcerer: 1, warlock: 1 } },
+      { c: { cleric: 2, druid: 1, paladin: 1 }, a: { ge: 1 }, s: { holy: 1 } } ],
+    v: [
+      ["有人在巷子里抢劫一位老人，你会？", "冲上去直接开打", "绕到劫匪背后，悄悄放倒他", "大喊一声，用气势和话术吓退他", "先扶起老人，看看伤得重不重"],
+      ["酒馆里有个醉汉找茬，眼看就要掀桌子，你会？", "站到他面前：有本事冲我来", "绕到他背后，一招把他按在桌上", "讲个笑话或者唱首歌，把场子救回来", "先把吓坏的人扶到一边"],
+      ["一群强盗围住了商队，你会？", "拔出武器，第一个冲出去", "悄悄绕到强盗头子身后", "站上马车大吼一声，用气势镇住他们", "护住受伤的车夫，先给他止血"]
+    ]},
+  { fx: [
+      { s: { sky: 2 } },
+      { s: { water: 2 } },
+      { s: { shadow: 2, stone: 1 } },
+      { s: { fire: 2 } } ],
+    v: [
+      ["你发现自己多了一种天生的本领，是什么？", "会飞", "能在水下呼吸", "在黑暗中看得清清楚楚", "能喷火"],
+      ["你的体质好像跟这个世界的某种元素特别合拍，是哪种？", "风：轻轻一跳就能飘起来", "水：游起泳来像鱼一样快", "黑暗：越暗的地方越自在", "火：冬天从来不觉得冷"],
+      ["穿越后你做的第一个梦是：", "在云层上面滑翔", "在海底和鱼群一起游", "在没有一丝光的地底行走", "站在火山口，一点也不觉得烫"]
+    ]},
+  { fx: [
+      { a: { lc: 2 }, b: { guard: 1 } },
+      { a: { lc: 1 } },
+      { a: { lc: -1 } },
+      { a: { lc: -2, ge: 1 } } ],
+    v: [
+      ["镇上的领主颁布了一条你觉得很蠢的法令，你会？", "再蠢也是法令，照做", "写信给领主，按正规渠道反对", "偷偷不遵守，没人看见就行", "带着大家公开反抗"],
+      ["城门守卫说，进城必须排三个小时队登记。你会？", "老老实实排队", "排着队，顺便跟守卫建议改改流程", "找条小路翻墙进去", "带着后面排队的人一起冲关"],
+      ["冒险者公会规定，新人得先做一个月杂活才能接委托。你会？", "照规定来，先把基础打好", "按规定做，但会申请提前考核", "偷偷借别人的名义接委托", { t: "自己拉一支队伍单干，谁管得着", fx: { a: { lc: -2 } } }]
+    ]},
+  { fx: [
+      { c: { druid: 2, ranger: 1 }, s: { wild: 1 } },
+      { c: { sorcerer: 2, wizard: 1 }, s: { arcane: 1 } },
+      { c: { warlock: 2, sorcerer: 1 }, s: { shadow: 1 } },
+      { c: { monk: 2, rogue: 1 } } ],
+    v: [
+      ["镇上的老巫婆说可以教你一种本事，你想学？", "和动物说话，还能变成动物", "操控火焰和雷电", "跟神秘存在签个契约，马上变强", "用意念控制身体，飞檐走壁"],
+      ["镇上来了个流浪马戏团，你最想学哪个绝活？", "跟狮子老虎打成一片的驯兽术", "手心里变出火球的戏法", "跟看不见的“观众”做交易换来的神秘把戏", "走钢丝、翻跟头的轻功"],
+      ["你在镇外的遗迹里摸到一块发光的石头，它想给你一种力量：", "听懂所有动物的语言", "让雷电听你使唤", "与石头里沉睡的存在立下契约", "身轻如燕，拳脚比刀剑还快"]
+    ]},
+  { fx: [
+      { b: { soldier: 2 } },
+      { b: { hermit: 2 } },
+      { b: { noble: 2 } },
+      { b: { charlatan: 2, entertainer: 1 } } ],
+    v: [
+      ["酒馆里大家在聊各自的过去，轮到你了，你说：", "“我以前上过战场。”", "“我一个人在山里住了好多年。”", "“我家里……还算有点钱。”", "现场编一个精彩的假故事"],
+      ["镇上的书记官给你登记身份，问你以前是做什么的，你说：", "“当过兵。”", "“在深山里修行。”", "“我出身一个没落的贵族家庭。”", "当场编一个，连名字都是假的"],
+      ["你身上有一样很有故事的东西，是什么？", "一道战场上留下的旧伤疤", "一串隐居时自己磨的木念珠", "一枚刻着家徽的戒指", "一叠写着不同名字的假证件"]
+    ]},
+  { fx: [
+      { s: { holy: 3 } },
+      { s: { shadow: 2, fire: 1 } },
+      { s: { fire: 2, big: 1 } },
+      { s: { fey: 3 } } ],
+    v: [
+      ["镇上的占卜师盯着你看了半天，说你的祖先是：", "天使", "恶魔或吸血鬼", "龙", "森林里的妖精"],
+      ["月光下，你的影子好像不太一样，它看起来像：", "背后长着一对光做的翅膀", "头上长着一对弯弯的犄角", "一条盘起来的龙", "一个踮着脚尖跳舞的小精灵"],
+      ["镇上的狗见到你会：", "安静地趴下，好像在向你行礼", "夹着尾巴躲得远远的", "冲你狂叫，但不敢靠近", "围着你转圈，像是闻到了花香"]
+    ]},
+
+  // ---------- 第三章：冒险 ----------
+  { fx: [
+      { c: { barbarian: 2, fighter: 1, paladin: 1 }, s: { big: 1 } },
+      { c: { ranger: 2, rogue: 1 } },
+      { c: { wizard: 2, sorcerer: 2, warlock: 1 } },
+      { c: { bard: 2, warlock: 1 }, b: { entertainer: 1 } } ],
+    v: [
+      ["一条巨龙挡住了去路，你会？", "举起武器正面冲", "躲在远处，找它的弱点放冷箭", "念咒语，放大招", "跟它聊天，或者唱首歌让它分心"],
+      ["一只巨大的食人魔冲进了营地，你会？", "抄起武器正面迎上去", "爬上树，从高处射它的眼睛", "念咒语，让它尝尝魔法的厉害", "跟它谈判：“我们有烤肉，分你一半？”"],
+      ["地下城深处，一只三头犬守着大门，你会？", "冲上去跟三个脑袋一起较量", "找个死角，等它打盹再下手", "放一道法术，把它定在原地", "唱首摇篮曲，看它会不会睡着"]
+    ]},
+  { fx: [
+      { a: { ge: 2 } },
+      { a: { lc: 1, ge: 1 } },
+      { a: { ge: -1 } },
+      { a: { ge: -2 } } ],
+    v: [
+      ["你们打败了一只哥布林，它跪在地上求饶。你会？", "放了它，还帮它包扎伤口", "绑起来，交给镇上处理", "先逼问出情报再说", "不留活口"],
+      ["你们在山洞里发现一窝没人照顾的狼崽，它们的父母刚被你们打败。你会？", "带回去好好养大", "交给镇上的驯兽师处理", "留在原地，听天由命", "抱去集市卖掉"],
+      ["委托人说：报酬翻倍，只要你们把村里的乞丐全赶走。你会？", "拒绝，还帮乞丐们找个落脚的地方", "先去找村长和守卫问清楚情况", "拿钱办事，不问原因", "不光赶走，还顺手拿走他们的东西"]
+    ]},
+  { fx: [
+      { s: { arcane: 2 } },
+      { s: { wild: 2, forest: 1 } },
+      { s: { tech: 3 } },
+      { s: { arcane: 1, sky: 1 }, l: { alien: 1 } } ],
+    v: [
+      ["冒险里最让你兴奋的是什么？", "发现失落的古老魔法", "和野兽、怪物交上朋友", "造出神奇的机关装置", "穿越到星空和别的世界"],
+      ["公会让你挑一个长期委托，你选：", "调查一座失落的法师塔", "去荒野里寻找传说中的神兽", "修好一台古代文明留下的巨大机器", "登上星界飞船，去别的世界看看"],
+      ["公会的藏宝室里，你最想要哪件宝物？", "一本写满失传咒语的魔法书", "一支能召来野兽伙伴的骨笛", "一副会自己动的机械手臂", "一张通往其他星球的星图"]
+    ]},
+  { fx: [
+      { c: { cleric: 2, druid: 1, paladin: 1 }, s: { holy: 1 } },
+      { c: { paladin: 2, fighter: 2, barbarian: 1 } },
+      { c: { artificer: 2, druid: 1, wizard: 1 } },
+      { c: { rogue: 2, monk: 1, ranger: 1 } } ],
+    v: [
+      ["队友在战斗中倒下了，你会？", "冲过去给他治疗", "挡在他前面，谁也别想再碰他", "造个机关或召个帮手，把敌人拖住", "赶紧解决最近的敌人，越快越好"],
+      ["你们被困在一座塌了一半的矿洞里，你会？", "先看看谁受了伤，一个个包扎", "用肩膀顶住快塌的石梁，让大家先走", "用木头和绳子搭个机关撑住洞顶", "一个人摸黑钻进小缝，去找别的出路"],
+      ["夜里有怪物偷袭营地，你的第一反应是？", "冲向离得最近的伤员", "拿起盾牌守在营火前", "赶紧启动早就布置好的警报和陷阱", "闪进黑暗，绕到怪物背后"]
+    ]},
+  { fx: [
+      { b: { farmer: 2 } },
+      { b: { scribe: 2, sage: 1 } },
+      { b: { wayfarer: 2, criminal: 1 } },
+      { b: { artisan: 2 } } ],
+    v: [
+      ["你的角色在当冒险者之前，最拿手的是？", "种地、养牲口", "抄写、整理古老卷轴", "在街头讨生活，什么都干过", "打造武器和工具"],
+      ["队伍里有件杂事需要人负责，你主动揽下了：", "照顾马匹和驮兽", "写冒险日志、画地图", "打听小道消息，跟三教九流混熟", "修补盔甲和武器"],
+      ["你的角色手上有一层老茧，那是因为：", "常年握锄头、挑扁担", "天天握笔写字", "在街头扛货、翻墙、打架", "打铁、雕木头、缝皮革"]
+    ]},
+  { fx: [
+      { c: { wizard: 2, artificer: 1 } },
+      { c: { warlock: 2, bard: 1 } },
+      { c: { cleric: 2, paladin: 1 }, s: { holy: 1 } },
+      { c: { monk: 2, fighter: 1, barbarian: 1 } } ],
+    v: [
+      ["你在地下城捡到一本会说话的书，它说能给你力量。你会？", "好好研读，弄懂它的原理", "先问它要什么代价，划算就签", "交给神殿的祭司，别乱碰", "扔了，力量要靠自己练"],
+      ["一个戴兜帽的神秘人说：“我能给你力量，只要你答应我一件事。”你会？", "“先告诉我这股力量的原理。”", "“什么事？说来听听，合适就成交。”", "“我只接受神明赐予的力量。”", "“不用了，我的拳头就够了。”"],
+      ["你在神殿废墟里发现一个封印着的魔法阵，你会？", "仔细临摹下来，回去慢慢研究", "试着跟里面封着的东西谈谈条件", "请神殿的祭司来重新加固封印", "不碰它，靠自己的本事继续往前"]
+    ]},
+  { fx: [
+      { a: { lc: 2 }, b: { soldier: 1 } },
+      { a: { lc: 1 } },
+      { a: { lc: -1 } },
+      { a: { lc: -2 } } ],
+    v: [
+      ["你加入了一支冒险小队，队长定了很多规矩。你会？", "规矩好，大家照着做才安全", "大部分遵守，不合理的提出来", "有用的听，没用的当没看见", "规矩就是用来打破的"],
+      ["你们答应护送商队，路上发现一条更快、但没人走过的小路。你会？", "按约定走大路，答应了就要守信", "先跟商队主人商量，他同意再走", "不吭声直接换路，快就行", "每天换一条路，走到哪算哪"],
+      ["国王要给你们授勋，要求所有人跪下行礼，你会？", "按礼节行礼，规矩不能乱", "跟着大家行礼，心里有自己的想法", "弯一下腰，意思意思", "站着不动，还冲国王眨眨眼"]
+    ]},
+  { fx: [
+      { s: { calm: 2, forest: 1 }, b: { hermit: 1 } },
+      { s: { big: 2, wild: 1 } },
+      { s: { small: 2, city: 1 } },
+      { s: { shadow: 2 } } ],
+    v: [
+      ["冒险结束后，你想过怎样的生活？", "回到大自然，安安静静过日子", "成为人人传颂的强大英雄", "在城里开一家小店", "隐姓埋名，做一个神秘的传说"],
+      ["吟游诗人要为你写一首歌，你希望它叫什么？", "《林间的守望者》", "《撼动大地的勇士》", "《小个子，大麻烦》", "《无人知晓的影子》"],
+      ["一百年后，人们会怎么讲你的故事？", "“一位隐居山林的老人，偶尔下山救人。”", "“一个力大无穷、独自打退巨人的英雄。”", "“那个开小店的小个子，原来是传奇冒险者。”", "“没人说得清他是谁，只知道他来过。”"]
+    ]},
+  { fx: [
+      { b: { acolyte: 2 } },
+      { b: { criminal: 2 } },
+      { b: { sailor: 2, guide: 1 } },
+      { b: { merchant: 2 } } ],
+    v: [
+      ["你的冒险背包里有一件从不离身的宝贝，是什么？", "一枚神殿的圣徽", "一套开锁工具", "一张旧航海图", "一本写满账目的小本子"],
+      ["冒险途中，最常有人认出你的哪个身份？", "“这不是神殿里那位吗？”", "“喂！你不是上个月偷了我钱袋的那个……”", "“哟，老伙计，又在码头碰上了！”", "“老板！上次那批货还有吗？”"],
+      ["路上遇到麻烦，你最先想到找谁帮忙？", "以前在神殿里一起修行的同伴", "以前道上的老朋友", "以前一起出海的老水手", "以前做生意认识的老主顾"]
+    ]},
+  { fx: [
+      { c: { paladin: 2, fighter: 2, cleric: 1 } },
+      { c: { ranger: 2, fighter: 1 } },
+      { c: { wizard: 2, sorcerer: 1, druid: 1 } },
+      { c: { artificer: 2 }, s: { tech: 1 } } ],
+    v: [
+      ["冒险者公会让你挑一件装备，你选？", "一身重甲和一面盾牌", "一张能射穿龙鳞的长弓", "一根能储存魔力的法杖", "一个会自己走路的机械小助手"],
+      ["终于到了最终决战，你希望自己站在哪里？", "最前排，用身体挡住所有攻击", "远处的高地上，一箭一个精准点名", "后排，酝酿一个扭转战局的大法术", "机关台前，操控自己造的战斗机器"],
+      ["公会给你发了一枚徽章，你希望上面刻着什么？", "一面盾牌", "一支箭", "一颗星星", "一个齿轮"]
+    ]}
+];
+
+if (typeof module !== "undefined") module.exports = QUIZ;
+
+</script>
+<script>
+// ===== 计分逻辑 =====
+var LOOK_W = 2.0; // 外形题的分量
+function quizMaxima(Q) {
+  var max = { c: {}, s: {}, l: {}, b: {} };
+  Q.questions.forEach(function (qq) {
+    ["c", "s", "l", "b"].forEach(function (k) {
+      var best = {};
+      qq.o.forEach(function (op) {
+        var e = op[k] || {};
+        Object.keys(e).forEach(function (id) {
+          if (e[id] > (best[id] || 0)) best[id] = e[id];
+        });
+      });
+      Object.keys(best).forEach(function (id) {
+        max[k][id] = (max[k][id] || 0) + best[id];
+      });
+    });
+  });
+  return max;
+}
+
+// 每一项在“随便乱选”时的平均分和波动，用来把分数拉到同一把尺子上
+function quizStats(Q) {
+  var st = { c: {}, s: {}, l: {}, b: {} };
+  ["c", "s", "l", "b"].forEach(function (k) {
+    var ids = {};
+    Q.questions.forEach(function (qq) {
+      qq.o.forEach(function (op) { Object.keys(op[k] || {}).forEach(function (id) { ids[id] = 1; }); });
+    });
+    Object.keys(ids).forEach(function (id) {
+      var mu = 0, v = 0;
+      Q.questions.forEach(function (qq) {
+        var n = qq.o.length;
+        var vals = qq.o.map(function (op) { return (op[k] && op[k][id]) || 0; });
+        var m = vals.reduce(function (a, b) { return a + b; }, 0) / n;
+        var m2 = vals.reduce(function (a, b) { return a + b * b; }, 0) / n;
+        mu += m; v += m2 - m * m;
+      });
+      st[k][id] = { mu: mu, sd: Math.sqrt(v) || 1 };
+    });
+  });
+  return st;
+}
+
+// 抽题：每个题位随机抽一个问法，并打乱选项的显示顺序
+function quizBuildRun(Q, rand) {
+  rand = rand || Math.random;
+  var KEYS = ["c", "s", "l", "b", "a"];
+  var questions = Q.slots.map(function (slot, si) {
+    var vi = Math.floor(rand() * slot.v.length);
+    var v = slot.v[vi];
+    var opts = slot.fx.map(function (fx, oi) {
+      var raw = v[oi + 1];
+      var isObj = typeof raw === "object";
+      var eff = isObj && raw.fx ? raw.fx : fx;
+      var o = { t: isObj ? raw.t : raw };
+      KEYS.forEach(function (k) { if (eff[k]) o[k] = eff[k]; });
+      return o;
+    });
+    var order = opts.map(function (_, i) { return i; });
+    for (var i = order.length - 1; i > 0; i--) {
+      var j = Math.floor(rand() * (i + 1));
+      var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+    }
+    return { q: v[0], o: opts, slot: si, variant: vi, order: order };
+  });
+  var stages = Q.stages.map(function (s) {
+    return { at: s.at, title: s.title, text: s.texts[Math.floor(rand() * s.texts.length)] };
+  });
+  return {
+    classes: Q.classes, species: Q.species, backgrounds: Q.backgrounds,
+    alignments: Q.alignments, alignAxes: Q.alignAxes,
+    questions: questions, stages: stages
+  };
+}
+
+function nameHash(str) {
+  var h = 2166136261;
+  for (var i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967295;
+}
+
+function quizScore(Q, answers, name) {
+  var pts = { c: {}, s: {}, l: {}, b: {} };
+  var lc = 0, ge = 0;
+  answers.forEach(function (ai, qi) {
+    var op = Q.questions[qi].o[ai];
+    ["c", "s", "l", "b"].forEach(function (k) {
+      var e = op[k] || {};
+      Object.keys(e).forEach(function (id) {
+        pts[k][id] = (pts[k][id] || 0) + e[id];
+      });
+    });
+    if (op.a) { lc += op.a.lc || 0; ge += op.a.ge || 0; }
+  });
+
+  var st = quizStats(Q);
+  function norm(k, id) {
+    var s = st[k][id];
+    if (!s) return 0;
+    return ((pts[k][id] || 0) - s.mu) / s.sd;
+  }
+  function jitter(id) { return nameHash((name || "") + "|" + id) * 0.001; }
+  function top3(list, scorer) {
+    return list
+      .map(function (item) { return { item: item, score: scorer(item) + jitter(item.id) }; })
+      .sort(function (a, b) { return b.score - a.score; })
+      .slice(0, 3)
+      .map(function (x) { return x.item; });
+  }
+
+  var classes = top3(Q.classes, function (c) { return norm("c", c.id); });
+  var species = top3(Q.species, function (sp) {
+    var t = sp.tags.map(function (tag) { return norm("s", tag); });
+    // 第一个标签最重要，第二个次之，第三个再次
+    return LOOK_W * norm("l", sp.look) + 2 * t[0] + 1.5 * (t[1] || 0) + 0.75 * (t[2] || 0);
+  });
+  var backgrounds = top3(Q.backgrounds, function (b) { return norm("b", b.id); });
+
+  var law = lc >= 2 ? "L" : lc <= -2 ? "C" : "N";
+  var good = ge >= 2 ? "G" : ge <= -2 ? "E" : "N";
+  var key = law === "N" && good === "N" ? "N" : law + good;
+  var alignment = Q.alignments[key];
+
+  // 两条阵营轴各自可能的最低分和最高分（用来画“你在哪”的位置条）
+  var range = { lcMin: 0, lcMax: 0, geMin: 0, geMax: 0 };
+  Q.questions.forEach(function (qq) {
+    var lcs = qq.o.map(function (op) { return (op.a && op.a.lc) || 0; });
+    var ges = qq.o.map(function (op) { return (op.a && op.a.ge) || 0; });
+    range.lcMin += Math.min.apply(null, lcs); range.lcMax += Math.max.apply(null, lcs);
+    range.geMin += Math.min.apply(null, ges); range.geMax += Math.max.apply(null, ges);
+  });
+
+  return {
+    classes: classes,
+    species: species,
+    backgrounds: backgrounds,
+    alignmentKey: key,
+    alignment: alignment,
+    lc: lc,
+    ge: ge,
+    range: range
+  };
+}
+
+if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quizMaxima: quizMaxima, quizBuildRun: quizBuildRun };
+
+</script>
+<script>
+(function () {
+  var Q = null; // 本次抽到的题
+  var state = { name: "", answers: [], i: 0, result: null };
+  var $ = function (id) { return document.getElementById(id); };
+  var CH_NAMES = ["第一章 · 平凡的一天", "第二章 · 穿越", "第三章 · 冒险开始"];
+  var CODE = "0123456789ab";
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("on"); });
+    $(id).classList.add("on");
+    window.scrollTo(0, 0);
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function stageAt(i) {
+    for (var k = 0; k < Q.stages.length; k++) if (Q.stages[k].at === i) return Q.stages[k];
+    return null;
+  }
+
+  // ----- 开始 -----
+  $("btn-start").addEventListener("click", function () {
+    var n = $("name").value.trim();
+    if (!n) { $("name-err").textContent = "先填个名字，主持人才知道这是谁的结果"; $("name").focus(); return; }
+    $("name-err").textContent = "";
+    state.name = n;
+    Q = quizBuildRun(QUIZ);
+    state.answers = [];
+    state.i = 0;
+    goTo(0, true);
+  });
+  $("name").addEventListener("keydown", function (e) { if (e.key === "Enter") $("btn-start").click(); });
+  $("name").addEventListener("input", function () { $("name-err").textContent = ""; });
+
+  // ----- 章节 -----
+  var pendingIndex = 0;
+  function showChapter(st, i) {
+    pendingIndex = i;
+    $("ch-title").textContent = st.title;
+    $("ch-text").textContent = st.text;
+    show("s-chapter");
+    $("btn-chapter").focus();
+  }
+  $("btn-chapter").addEventListener("click", function () { renderQuestion(pendingIndex); });
+
+  // ----- 答题 -----
+  function goTo(i, forward) {
+    var st = stageAt(i);
+    if (forward && st) showChapter(st, i);
+    else renderQuestion(i);
+  }
+
+  function renderTicks(i) {
+    var html = "";
+    for (var g = 0; g < 3; g++) {
+      html += '<div class="grp">';
+      for (var k = 0; k < 10; k++) {
+        var n = g * 10 + k;
+        html += '<i class="' + (n < i ? "done" : n === i ? "now" : "") + '"></i>';
+      }
+      html += "</div>";
+    }
+    $("ticks").innerHTML = html;
+  }
+
+  function renderQuestion(i) {
+    state.i = i;
+    var qq = Q.questions[i];
+    renderTicks(i);
+    $("ch-label").textContent = CH_NAMES[Math.floor(i / 10)];
+    $("q-count").textContent = "第 " + (i + 1) + " 题 / 共 " + Q.questions.length + " 题";
+    $("q-text").textContent = qq.q;
+    var box = $("q-opts");
+    box.innerHTML = "";
+    qq.order.forEach(function (oi) {
+      var b = document.createElement("button");
+      b.className = "opt" + (state.answers[i] === oi ? " picked" : "");
+      b.textContent = qq.o[oi].t;
+      b.addEventListener("click", function () { choose(i, oi, b); });
+      box.appendChild(b);
+    });
+    $("btn-back").hidden = i === 0;
+    show("s-quiz");
+  }
+
+  var locked = false;
+  function choose(i, oi, btn) {
+    if (locked) return;
+    locked = true;
+    state.answers[i] = oi;
+    document.querySelectorAll(".opt").forEach(function (o) { o.classList.remove("picked"); });
+    btn.classList.add("picked");
+    setTimeout(function () {
+      locked = false;
+      if (i + 1 < Q.questions.length) goTo(i + 1, true);
+      else finish();
+    }, 180);
+  }
+
+  $("btn-back").addEventListener("click", function () {
+    if (state.i > 0) renderQuestion(state.i - 1);
+  });
+
+  // ----- 结果 -----
+  function finish() {
+    state.result = quizScore(Q, state.answers, state.name);
+    show("s-roll");
+    var die = $("roll-die");
+    die.classList.remove("spin");
+    void die.offsetWidth;
+    die.classList.add("spin");
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(renderResult, reduce ? 300 : 1600);
+  }
+
+  function stars(n) {
+    var word = ["", "简单", "中等", "较难"][n];
+    return '<span class="star">' + "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n) + "</span> " + word;
+  }
+
+  function pickBlock(list, withStars) {
+    var m = list[0];
+    var html = '<div class="pick-main"><div class="nm">' + esc(m.zh) + '<span class="en">' + esc(m.en) + "</span></div>";
+    if (withStars) html += '<div class="diff">上手难度 ' + stars(m.stars) + "</div>";
+    if (m.lore) {
+      html += '<p class="lore">' + esc(m.lore) + "</p>";
+      html += '<p class="plain">简单说：' + esc(m.desc) + "</p></div>";
+    } else {
+      html += "<p>" + esc(m.desc) + "</p></div>";
+    }
+    html += '<div class="alts"><p class="lbl">也挺适合你</p>';
+    list.slice(1).forEach(function (a) {
+      html += '<div class="alt"><b>' + esc(a.zh) + '</b><span class="en">' + esc(a.en) + "</span>";
+      if (withStars) html += '<span class="diff"> ' + stars(a.stars) + "</span>";
+      html += "<br>" + esc(a.desc);
+      if (a.lore) html += '<details class="more"><summary>展开介绍</summary><p class="lore">' + esc(a.lore) + "</p></details>";
+      html += "</div>";
+    });
+    return html + "</div>";
+  }
+
+  function renderGrid(key) {
+    var cols = [["L", "守序"], ["N", "中立"], ["C", "混乱"]];
+    var rows = [["G", "善良"], ["N", "中立"], ["E", "邪恶"]];
+    var html = '<div></div>' + cols.map(function (c) { return '<div class="ax">' + c[1] + "</div>"; }).join("");
+    rows.forEach(function (r) {
+      html += '<div class="ax">' + r[1] + "</div>";
+      cols.forEach(function (c) {
+        var k = c[0] === "N" && r[0] === "N" ? "N" : c[0] + r[0];
+        var a = Q.alignments[k];
+        html += '<div class="cell' + (k === key ? " lit" : "") + '">' + a.zh + "</div>";
+      });
+    });
+    $("r-grid").innerHTML = html;
+  }
+
+  // 位置条：左边是守序 / 善良，右边是混乱 / 邪恶，和九宫格方向一致
+  function axisRow(left, right, val, max, min, note) {
+    var pct = max === min ? 50 : Math.round((max - val) / (max - min) * 100);
+    pct = Math.max(3, Math.min(97, pct));
+    // 阵营的分界线：分数 >= 2 算左边，<= -2 算右边
+    var cut1 = Math.round((max - 1.5) / (max - min) * 100);
+    var cut2 = Math.round((max + 1.5) / (max - min) * 100);
+    return '<div><div class="axis-row"><span class="end">' + left + '</span><div class="track">' +
+      '<span class="third" style="left:' + cut1 + '%"></span><span class="third" style="left:' + cut2 + '%"></span>' +
+      '<span class="dot" style="left:' + pct + '%"></span></div><span class="end">' + right + "</span></div>" +
+      '<p class="axis-note">' + esc(note) + "</p></div>";
+  }
+
+  function renderAlign(r) {
+    var a = r.alignment, g = r.range;
+    var html = '<div class="axes">' +
+      axisRow("守序", "混乱", r.lc, g.lcMax, g.lcMin, Q.alignAxes.lc) +
+      axisRow("善良", "邪恶", r.ge, g.geMax, g.geMin, Q.alignAxes.ge) + "</div>";
+    html += '<p class="align-desc"><b>' + esc(a.zh) + '</b><span class="en" style="color:var(--muted);font-size:14px;margin-left:6px">' + esc(a.en) + "</span></p>";
+    html += '<p class="lore">' + esc(a.lore) + "</p>";
+    html += '<p class="like">就像' + esc(a.like) + "</p>";
+    if (r.alignmentKey.indexOf("E") !== -1) {
+      html += '<p class="warn">测出邪恶也别慌，这只是角色的性格。不过邪恶角色要提前和主持人商量，确保大家都玩得开心。</p>';
+    }
+    $("r-align").innerHTML = html;
+  }
+
+  function conceptText(r) {
+    var c = r.classes[0], s = r.species[0], b = r.backgrounds[0];
+    return "一个" + r.alignment.zh + "的" + s.zh + c.zh + "，当冒险者之前是个" + b.zh + "。";
+  }
+
+  function renderResult() {
+    var r = state.result;
+    var c = r.classes[0], s = r.species[0], b = r.backgrounds[0];
+    $("r-name").textContent = state.name;
+    $("r-concept").innerHTML = "一个<span class=\"a\">" + esc(r.alignment.zh) + "</span>的<span class=\"s\">" + esc(s.zh) +
+      "</span><span class=\"c\">" + esc(c.zh) + "</span>，当冒险者之前是个<span class=\"b\">" + esc(b.zh) + "</span>。";
+    $("r-tagline").textContent = r.alignment.desc + "。";
+    $("r-class").innerHTML = pickBlock(r.classes, true);
+    $("r-species").innerHTML = pickBlock(r.species, false);
+    $("r-bg").innerHTML = pickBlock(r.backgrounds, false);
+    renderGrid(r.alignmentKey);
+    renderAlign(r);
+    show("s-result");
+    send();
+  }
+
+  // ----- 交给主持人 -----
+  function label(x) { return x.zh + " " + x.en; }
+  function answerCode() {
+    // 每题一个字符：记下抽到的问法和选了哪个，方便以后核对
+    return Q.questions.map(function (qq, i) { return CODE.charAt(qq.variant * 4 + state.answers[i]); }).join("");
+  }
+  function send() {
+    var st = $("r-status");
+    if (!SHEET_URL) {
+      st.textContent = "汇总地址还没设置，这次结果不会交给主持人。";
+      return;
+    }
+    var r = state.result;
+    var payload = {
+      name: state.name,
+      class1: label(r.classes[0]), class2: label(r.classes[1]), class3: label(r.classes[2]),
+      species1: label(r.species[0]), species2: label(r.species[1]), species3: label(r.species[2]),
+      bg1: label(r.backgrounds[0]), bg2: label(r.backgrounds[1]), bg3: label(r.backgrounds[2]),
+      alignment: label(r.alignment),
+      concept: conceptText(r),
+      answers: answerCode()
+    };
+    st.textContent = "正在把结果交给主持人……";
+    fetch(SHEET_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).then(function () {
+      st.textContent = "✓ 结果已交给主持人。";
+    }).catch(function () {
+      st.innerHTML = "结果没交上去，可能是网络问题。<button type=\"button\" id=\"retry\">再交一次</button>";
+      $("retry").addEventListener("click", send);
+    });
+  }
+
+  $("btn-again").addEventListener("click", function () {
+    $("name").value = state.name;
+    show("s-start");
+  });
+})();
+</script>
+</body>
+</html>
