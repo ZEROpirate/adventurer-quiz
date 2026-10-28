@@ -485,7 +485,7 @@ QUIZ.species = [
   { id: "vedalken", zh: "维多肯", en: "Vedalken", look: "touch", tags: ["arcane", "calm", "tech"],
     desc: "蓝皮肤，冷静理性，做什么都追求完美",
     lore: "维多肯有着蓝色的皮肤和冷静的头脑，他们相信世间万物都还有改进的空间。在维多肯眼里，失败只是下一次成功的数据。他们追求的不是完美本身，而是一点点逼近完美的那个过程。" },
-  { id: "simic", zh: "析米克混生体", en: "Simic Hybrid", look: "alien", tags: ["water", "tech"],
+  { id: "simic", zh: "析米克混生体", en: "Simic Hybrid", look: "alien", tags: ["wild", "water", "tech"],
     desc: "被魔法改造过的人，身上嫁接了动物特征",
     lore: "析米克混生体是魔法与生物实验的产物：人的身体上嫁接了动物的特征，也许是滑翔用的翼膜、带吸盘的触手，也许是甲壳和夜视的眼睛。他们是活生生的“进化”，每一个混生体都独一无二。" },
   { id: "leonin", zh: "狮族", en: "Leonin", look: "animal", tags: ["wild", "big"],
@@ -497,7 +497,7 @@ QUIZ.species = [
   { id: "astralelf", zh: "星界精灵", en: "Astral Elf", look: "touch", tags: ["arcane", "holy", "sky"],
     desc: "住在星界的精灵，身上带着星光",
     lore: "星界精灵是很久以前离开大地、移居星界的精灵。在那片时间几乎静止的银色虚空里，他们身上沾染了星辰的光辉。星界精灵的眼中闪着星光，他们见过的世界，比任何人都多。" },
-  { id: "autognome", zh: "自动侏儒", en: "Autognome", look: "alien", tags: ["tech", "small"],
+  { id: "autognome", zh: "自动侏儒", en: "Autognome", look: "alien", tags: ["joy", "small", "tech"],
     desc: "侏儒造出来的小机器人，有了自己的意识",
     lore: "自动侏儒是侏儒发明家造出来的机械小人，原本只是帮手或玩具，却不知从哪天起有了自己的意识。他们靠齿轮、发条和魔法运转，好奇地打量着这个世界，努力弄明白“活着”到底是什么感觉。" },
   { id: "giff", zh: "诘弗人", en: "Giff", look: "animal", tags: ["big", "tech"],
@@ -509,13 +509,13 @@ QUIZ.species = [
   { id: "plasmoid", zh: "流浆体", en: "Plasmoid", look: "alien", tags: ["water", "shadow"],
     desc: "一团有意识的软泥，能变形，能挤过很窄的缝",
     lore: "流浆体是一团有意识的软泥，没有骨头，也没有固定的形状。他们可以伸出触手般的“手臂”，也能把自己挤进一道细缝。流浆体看世界的方式和谁都不一样，常常对人类的习俗既困惑又好奇。" },
-  { id: "thrikreen", zh: "螳螂人", en: "Thri-kreen", look: "alien", tags: ["wild", "calm"],
+  { id: "thrikreen", zh: "螳螂人", en: "Thri-kreen", look: "alien", tags: ["arcane", "calm", "wild"],
     desc: "像螳螂的虫人，四只手臂，不用睡觉，会心灵感应",
     lore: "螳螂人是长着四只手臂的虫族，甲壳会随环境变色。他们从不睡觉，只需要静静休息；他们不靠嘴说话，而是用心灵感应交流。螳螂人看起来冷漠，其实对同伴极其忠诚，会把队友当成自己的族群。" },
   { id: "kender", zh: "坎德人", en: "Kender", look: "touch", tags: ["joy", "small", "city"],
     desc: "小个子，天不怕地不怕，好奇心重，嘴特别会气人",
     lore: "坎德人个子小小，天不怕地不怕，好奇心重得没边。别人的口袋、上锁的箱子、禁止入内的房间，在他们看来都像是一封邀请函。坎德人那张嘴更厉害，一句话就能把对手气得跳脚，露出破绽。" },
-  { id: "warforged", zh: "战俑", en: "Warforged", look: "alien", tags: ["tech", "big", "calm"],
+  { id: "warforged", zh: "战俑", en: "Warforged", look: "alien", tags: ["calm", "holy", "big"],
     desc: "为战争制造的活体魔像，有了自我意识，正在寻找人生意义",
     lore: "战俑是为一场漫长战争制造的活体魔像，由木头、金属和石头组成，体内燃着魔法的火花。战争结束了，他们却留了下来，带着自我意识和一身伤痕。战俑不吃不睡，却在努力学一件比打仗更难的事：怎样生活。" },
   { id: "kalashtar", zh: "离梦人", en: "Kalashtar", look: "human", tags: ["arcane", "holy", "calm"],
@@ -1080,7 +1080,7 @@ QUIZ.slots.forEach(function (slot, si) {
 QUIZ.alignCut = { lawful: 4, chaotic: -1, good: 4, evil: -2 };
 
 // 物种校准：同一种外形里，每个物种出现的机会差不多
-QUIZ.calib = { s: {"human":0.15,"elf":0.21,"dwarf":-0.35,"halfling":-0.09,"gnome":-0.34,"dragonborn":-0.78,"tiefling":-0.11,"aasimar":-1.27,"goliath":-0.89,"orc":-0.23,"halfelf":0.7,"halforc":-0.12,"aarakocra":-0.08,"bugbear":0.42,"centaur":0.04,"changeling":0.48,"deepgnome":-0.08,"duergar":0.24,"eladrin":0.89,"fairy":0.11,"firbolg":-0.78,"genasi_air":0.13,"genasi_earth":0.95,"genasi_fire":-0.53,"genasi_water":-1.19,"githyanki":0.84,"githzerai":1.04,"goblin":0.68,"harengon":-1.45,"hobgoblin":-0.19,"kenku":-0.58,"kobold":-0.91,"lizardfolk":0.45,"minotaur":1.32,"satyr":-0.85,"seaelf":-0.25,"shadarkai":1.14,"shifter":-1.21,"tabaxi":0.65,"tortle":-1.16,"triton":-0.79,"yuanti":0.39,"loxodon":0.53,"vedalken":1.25,"simic":0.58,"leonin":1.35,"owlin":-0.09,"astralelf":0.15,"autognome":-0.22,"giff":-0.01,"hadozee":0.36,"plasmoid":-0.16,"thrikreen":-0.62,"kender":-0.83,"warforged":0.04,"kalashtar":-1.08,"khoravar":0.32,"verdan":0.5,"dhampir":-0.65,"hexblood":0.93,"lupin":0.21,"reborn":0.13,"duskling":0.75} };
+QUIZ.calib = { s: {"human":0.17,"elf":0.28,"dwarf":-0.32,"halfling":-0.11,"gnome":-0.38,"dragonborn":-0.85,"tiefling":-0.09,"aasimar":-1.33,"goliath":-0.98,"orc":-0.19,"halfelf":0.69,"halforc":-0.09,"aarakocra":-0.07,"bugbear":0.38,"centaur":0.11,"changeling":0.49,"deepgnome":-0.13,"duergar":0.2,"eladrin":0.96,"fairy":0.07,"firbolg":-0.7,"genasi_air":0.01,"genasi_earth":0.91,"genasi_fire":-0.41,"genasi_water":-1.3,"githyanki":0.86,"githzerai":1.11,"goblin":0.54,"harengon":-1.49,"hobgoblin":-0.16,"kenku":-0.58,"kobold":-0.87,"lizardfolk":0.58,"minotaur":1.22,"satyr":-0.77,"seaelf":-0.25,"shadarkai":1.2,"shifter":-1.17,"tabaxi":0.74,"tortle":-1.24,"triton":-0.84,"yuanti":0.41,"loxodon":0.46,"vedalken":1.31,"simic":0.09,"leonin":1.33,"owlin":-0.1,"astralelf":0.06,"autognome":-0.93,"giff":-0.03,"hadozee":0.39,"plasmoid":0.29,"thrikreen":0.23,"kender":-0.83,"warforged":-0.08,"kalashtar":-1.02,"khoravar":0.23,"verdan":0.49,"dhampir":-0.68,"hexblood":0.98,"lupin":0.3,"reborn":0.11,"duskling":0.79} };
 
 if (typeof module !== "undefined") module.exports = QUIZ;
 
