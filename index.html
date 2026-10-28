@@ -178,6 +178,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sapphire); 
 .alt b { font-size: 16px; }
 .alt .en { color: var(--muted); font-size: 13px; margin: 0 4px; }
 .tagline-s { display: block; font-size: 13px; color: var(--muted); }
+.fit { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; font-size: 13px; color: var(--muted); }
+.fit-bar { flex: 1; max-width: 180px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.fit-bar i { display: block; height: 100%; background: var(--ruby); border-radius: 3px; }
+.fit-n { font-weight: 700; color: var(--ink); min-width: 2.6em; }
+.pick-main .fit { font-size: 14px; }
+.pick-main .fit-bar { height: 8px; max-width: 220px; }
 
 .grid9 { display: grid; grid-template-columns: 2.4em repeat(3, 1fr); gap: 4px; margin-top: 4px; font-size: 14px; text-align: center; }
 .grid9 .ax { color: var(--muted); align-self: center; padding: 4px 0; }
@@ -610,7 +616,7 @@ QUIZ.stages = [
 ];
 
 // ===== 计分小工具 =====
-// 职业：主选项 +2，顺带给一个相近的职业 +1（每个职业正好被顺带 6 次）
+// 职业：主选项 +2，顺带给一个相近的职业 +0.5（每个职业正好被顺带 6 次）
 var CLS_SEC = { fighter: "paladin", paladin: "cleric", cleric: "druid", druid: "ranger", ranger: "rogue",
   rogue: "monk", monk: "barbarian", barbarian: "fighter",
   bard: "sorcerer", sorcerer: "warlock", warlock: "bard",
@@ -620,7 +626,7 @@ var BG_SEC = { acolyte: "hermit", hermit: "sage", sage: "scribe", scribe: "acoly
   criminal: "wayfarer", wayfarer: "entertainer", entertainer: "charlatan", charlatan: "criminal",
   soldier: "guard", guard: "noble", noble: "merchant", merchant: "artisan", artisan: "farmer",
   farmer: "guide", guide: "sailor", sailor: "soldier" };
-function cx(p) { var o = {}; o[p] = 2; o[CLS_SEC[p]] = 1; return { c: o }; }
+function cx(p) { var o = {}; o[p] = 2; o[CLS_SEC[p]] = 0.5; return { c: o }; }
 function bx(p) { var o = {}; o[p] = 2; o[BG_SEC[p]] = 1; return { b: o }; }
 function sx(p, s) { var o = {}; o[p] = 2; if (s) o[s] = 1; return { s: o }; }
 function lx(look) { var o = {}; o[look] = 4; return { l: o }; }
@@ -636,13 +642,13 @@ QUIZ.slots = [
   // ================= 第一章：平凡的一天 =================
   { kind: "class", fx: ["barbarian", "monk", "ranger", "bard", "wizard", "artificer"].map(cx), v: [
     ["突然多出一整天假期，你最想怎么过？",
-      "去打一场球或者拳击，痛痛快快出一身汗", "早起晨跑，再找个安静的地方发会儿呆", "一个人背上包，去郊外徒步",
+      "约上兄弟撸串，大碗喝酒、大块吃肉", "早起晨跑，再找个安静的地方发会儿呆", "一个人背上包，去郊外徒步",
       "约一群朋友去唱 K，唱到半夜", "泡在博物馆里，看古书和老地图", "在家拼模型、修东西，折腾一整天"],
     ["下班路上看到一家新开的店，你最可能走进哪种？",
-      "拳击馆或者攀岩馆", "安安静静的茶室", "卖露营装备的户外用品店",
+      "热气腾腾的烧烤大排档", "安安静静的茶室", "卖露营装备的户外用品店",
       "有现场演出的小酒馆", "堆满旧书的二手书店", "卖零件和工具的五金店"],
     ["朋友送你一张体验券，你会选哪个？",
-      "一节泰拳体验课", "一次清晨的山间禅修", "一晚野外露营",
+      "一次蹦极", "一次清晨的山间禅修", "一晚野外露营",
       "一次录音棚录歌", "一张天文馆年卡", "一节木工课"]
   ]},
   { kind: "align", fx: GE6, v: [
@@ -668,13 +674,13 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["fighter", "paladin", "rogue", "cleric", "bard", "sorcerer"].map(cx), v: [
     ["朋友遇到麻烦，第一个打给你，通常是因为？",
-      "你靠得住，什么事交给你都放心", "你护短，谁欺负他你跟谁急", "你路子野，总有办法搞定",
+      "你能打，真动起手来你一个顶仨", "你护短，谁欺负他你跟谁急", "你路子野，总有办法搞定",
       "你会安慰人，听你说完心里就舒服了", "你会聊天，三句话就能把他逗笑", "你点子多，常想到别人想不到的"],
     ["小组一起做事，你通常是哪种角色？",
-      "埋头干活、最后兜底的那个", "站出来带头、替大家扛压力的那个", "找到省事办法、让大家少走弯路的那个",
+      "关键时刻顶上去、一个人扛住全场的那个", "站出来带头、替大家扛压力的那个", "找到省事办法、让大家少走弯路的那个",
       "照顾大家情绪、给人打气的那个", "活跃气氛、让大家都愿意说话的那个", "关键时刻灵光一闪、想出好点子的那个"],
     ["朋友要搬家，你会帮什么忙？",
-      "扛最重的箱子，一趟又一趟", "统一指挥，安排谁搬什么", "跟房东和搬家公司砍价，省下一大笔",
+      "一个人扛着冰箱上五楼，脸不红气不喘", "统一指挥，安排谁搬什么", "跟房东和搬家公司砍价，省下一大笔",
       "准备吃喝，照顾累坏的人", "放音乐、讲段子，让大家干得开心", "突然想到一个绝妙的家具摆法"]
   ]},
   { kind: "bg", fx: ["artisan", "sage", "entertainer", "merchant", "farmer", "guide"].map(bx), v: [
@@ -711,21 +717,21 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["barbarian", "rogue", "monk", "warlock", "sorcerer", "wizard"].map(cx), v: [
     ["遇到一件很头疼的事，你通常怎么应对？",
-      "先发泄出来，吼两声、跑一圈就好了", "绕开正面，找一条别人没想到的路子", "让自己先静下来，再慢慢处理",
+      "管它呢，先吃顿好的，睡一觉起来再说", "绕开正面，找一条别人没想到的路子", "让自己先静下来，再慢慢处理",
       "找个有门路的人帮忙，欠个人情也无所谓", "跟着感觉走，直觉通常不会错", "查个底朝天，弄不明白就睡不着"],
     ["打游戏时，最让你爽的瞬间是？",
       "残血反杀，硬刚赢了", "偷袭得手，对面都没反应过来", "一套连招打完，一滴血没掉",
       "用一个邪门的套路赢了", "随手乱按，居然打出神操作", "一切都按你算好的剧本走"],
     ["你解压的方式是？",
-      "找个地方大喊一声，或者狠狠打一场球", "一个人在城市里乱逛，专钻小巷子", "泡澡、冥想，安安静静地发呆",
+      "去 KTV 吼一晚上，再吃一顿超辣火锅", "一个人在城市里乱逛，专钻小巷子", "泡澡、冥想，安安静静地发呆",
       "看恐怖片、听怪谈，越吓人越放松", "说走就走，临时决定去哪里", "钻研一个冷门知识，越冷门越好"]
   ]},
   { kind: "bg", fx: ["scribe", "farmer", "noble", "criminal", "acolyte", "wayfarer"].map(bx), v: [
     ["你小时候是个怎样的孩子？",
-      "字写得特别工整，作业本永远最干净", "天天在外面野，带一身泥回家", "孩子王，小伙伴都听你的",
+      "爱抄歌词、抄喜欢的句子，攒了好几本", "天天在外面野，带一身泥回家", "孩子王，小伙伴都听你的",
       "调皮捣蛋，老师的重点关注对象", "常跟着家里老人去庙会、烧香", "经常搬家，到哪都是新来的"],
     ["小时候的暑假，你大多在干什么？",
-      "在家练字、写日记", "回乡下爷爷奶奶家，抓鱼摸虾", "上各种兴趣班：钢琴、马术、礼仪",
+      "在家写日记，连每天吃了什么都记下来", "回乡下爷爷奶奶家，抓鱼摸虾", "上各种兴趣班：钢琴、马术、礼仪",
       "跟着大孩子混，学了不少“歪门邪道”", "去寺庙或者教会的夏令营", "一个人在街上到处逛，天黑才回家"],
     ["学生时代，你最像班里的哪种人？",
       "负责写黑板报的那个", "劳动课最卖力的那个", "班长，大家有事都来找你",
@@ -744,13 +750,13 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["fighter", "monk", "paladin", "artificer", "cleric", "druid"].map(cx), v: [
     ["什么事最让你有成就感？",
-      "一项技能练了很久，终于练到熟练", "坚持了一个习惯，整个人状态都变好了", "说到做到，兑现了一个很难的承诺",
+      "苦练一招，终于练到出神入化", "坚持了一个习惯，整个人状态都变好了", "说到做到，兑现了一个很难的承诺",
       "亲手做出一个能用的东西", "帮身边的人渡过了难关", "养的植物开花了，或者宠物跟你特别亲"],
     ["你最想收到哪种礼物？",
-      "一把做工精良的好刀，厨刀也算", "一套舒服的运动服和跑鞋", "一枚刻着你名字的纪念徽章",
+      "一把开了刃的好刀，挂在墙上都威风", "一套舒服的运动服和跑鞋", "一枚刻着你名字的纪念徽章",
       "一套全是小零件的高级工具箱", "一个从寺庙或神社求来的护身符", "一盆稀有的植物，或者一只小动物"],
     ["如果能拜一位师傅学一年，你选谁？",
-      "一位剑术大师", "一位少林寺的老师父", "一位守城几十年的老将军",
+      "一位独孤求败那样的剑术大师", "一位少林寺的老师父", "一位守城几十年的老将军",
       "一位钟表匠", "一位能治病救人的老中医", "一位种了一辈子树的护林员"]
   ]},
   { kind: "bg", fx: ["merchant", "entertainer", "guard", "sailor", "artisan", "charlatan"].map(bx), v: [
@@ -768,13 +774,13 @@ QUIZ.slots = [
   // ================= 第二章：穿越 =================
   { kind: "class", fx: ["fighter", "ranger", "rogue", "wizard", "artificer", "cleric"].map(cx), v: [
     ["穿越时你身上只能带一样东西，你选？",
-      "一把趁手的好刀", "一副弓箭", "一套开锁工具",
+      "一把削铁如泥的宝刀", "一副弓箭", "一套开锁工具",
       "一本百科全书", "一个工具箱", "一个装满药品的急救包"],
     ["穿越过来后，你身上的现代物品变成了什么？",
-      "雨伞变成了一把长剑", "耳机线变成了一根结实的弓弦", "钥匙串变成了一套万能钥匙",
+      "雨伞变成了一把寒光闪闪的长剑", "耳机线变成了一根结实的弓弦", "钥匙串变成了一套万能钥匙",
       "手机变成了一本会自己翻页的书", "充电宝变成了一个嗡嗡作响的小机关", "护身符开始发出温暖的光"],
     ["镇上的杂货铺在打折，你挑了什么？",
-      "一面结实的盾牌", "一把轻便的猎弓", "一双走路没有声音的软底靴",
+      "一把好剑，剑鞘上刻着前主人的名字", "一把轻便的猎弓", "一双走路没有声音的软底靴",
       "一本老板自己都看不懂的古书", "一套精细的锉刀和齿轮", "一瓶据说能治百病的圣水"]
   ]},
   { kind: "species", fx: [sx("forest", "wild"), sx("stone", "small"), sx("sky", "big"), sx("city", "tech"), sx("water", "holy"), sx("fey", "arcane")], v: [
@@ -812,7 +818,7 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["barbarian", "monk", "warlock", "druid", "sorcerer", "paladin"].map(cx), v: [
     ["镇上的老巫婆说可以教你一种本事，你想学？",
-      "发起怒来刀枪不入、力大无穷", "提一口气就身轻如燕，飞檐走壁", "跟一个神秘存在签约，马上换来强大力量",
+      "发起怒来刀枪不入，一拳能打穿城墙", "提一口气就身轻如燕，飞檐走壁", "跟一个神秘存在签约，马上换来强大力量",
       "和动物说话，还能变成动物", "操控火焰和雷电", "手掌发光，能治伤也能驱邪"],
     ["你在镇外的遗迹里摸到一块发光的石头，它想给你一种力量：",
       "让你变得像巨人一样强壮", "让你的拳脚快过刀剑", "让你和石头里沉睡的存在立下契约",
@@ -856,12 +862,12 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["fighter", "ranger", "artificer", "bard", "wizard", "druid"].map(cx), v: [
     ["镇上的人遇到麻烦来找你，你最擅长解决哪种？",
-      "有人被流氓骚扰，你去当保镖", "牲口被野兽叼走，你去追踪", "水车坏了，你去修",
+      "一伙流氓来闹事，你一个人把他们全打趴下", "牲口被野兽叼走，你去追踪", "水车坏了，你去修",
       "两家人吵起来了，你去调解", "收到一封看不懂的古老信件，你去解读", "庄稼得了怪病，你去诊治"],
     ["镇上的人给你起了个外号，是什么？",
-      "“铁壁”", "“鹰眼”", "“巧手”", "“金嗓子”", "“活字典”", "“草木之友”"],
+      "“快刀”", "“鹰眼”", "“巧手”", "“金嗓子”", "“活字典”", "“草木之友”"],
     ["镇上要办一场婚礼，你主动揽下了哪部分？",
-      "负责安保，守住会场", "进山打猎，准备宴席的野味", "搭舞台、装机关",
+      "负责安保，谁来砸场子就跟谁过两招", "进山打猎，准备宴席的野味", "搭舞台、装机关",
       "当主持人", "翻古籍，确保仪式一步都不出错", "布置满场的鲜花和绿植"]
   ]},
   { kind: "bg", fx: ["soldier", "hermit", "noble", "charlatan", "sailor", "criminal"].map(bx), v: [
@@ -887,7 +893,7 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["barbarian", "ranger", "artificer", "druid", "bard", "sorcerer"].map(cx), v: [
     ["镇上过节举办比赛，你报名了哪项？",
-      "掰手腕", "射箭", "机关发明大赛",
+      "喝酒比赛（全镇还没人喝赢过你）", "射箭", "机关发明大赛",
       "驯兽表演", "唱歌比赛", "烟火表演（你的烟火不用火柴就能点着）"],
     ["庆典之夜，你在广场上做了什么，让全镇都记住了你？",
       "一个人举起了整辆马车", "一箭射中了百步外的苹果", "放出一只会飞的机械鸟",
@@ -899,13 +905,13 @@ QUIZ.slots = [
   // ================= 第三章：冒险开始 =================
   { kind: "class", fx: ["fighter", "barbarian", "ranger", "wizard", "sorcerer", "warlock"].map(cx), v: [
     ["一条巨龙挡住了去路，你会？",
-      "握紧武器，一招一式地跟它周旋", "怒吼一声，正面冲上去", "躲在岩石后面，瞄准它的眼睛放箭",
+      "拔剑迎上去，专找它鳞片的缝隙下手", "大笑一声：“来得好！”抡起斧头就冲", "躲在岩石后面，瞄准它的眼睛放箭",
       "翻开法术书，找出专克它的那道咒语", "让体内的魔力全部爆发，跟它硬拼", "召唤契约里的力量，放出一道黑色的魔能爆"],
     ["一只巨大的食人魔冲进了营地，你会？",
-      "举起盾牌，稳稳接下它的第一击", "扔掉盾牌，直接扑上去跟它扭打", "爬上树，从高处射它",
+      "侧身闪过它的拳头，反手一刀砍在它膝盖上", "跳到它背上，抡起拳头一顿猛砸", "爬上树，从高处射它",
       "念一道咒语，把它困在原地", "双手一挥，一道闪电劈在它身上", "低声念出契约之名，让它陷入恐惧"],
     ["地下城深处，一只三头犬守着大门，你会？",
-      "按事先想好的战术，一步步逼近", "冲上去，跟三个脑袋一起较量", "找个死角，一箭一个脑袋",
+      "看准它出招的破绽，一剑刺进去", "一斧头劈向中间那个脑袋", "找个死角，一箭一个脑袋",
       "用一道法术让它沉沉睡去", "用一团火球把它和大门一起轰开", "让契约中的存在替你和它谈谈"]
   ]},
   { kind: "species", fx: [sx("arcane", "shadow"), sx("wild", "forest"), sx("tech", "stone"), sx("holy", "calm"), sx("joy", "city"), sx("fey", "joy")], v: [
@@ -932,10 +938,10 @@ QUIZ.slots = [
   ]},
   { kind: "bg", fx: ["farmer", "scribe", "wayfarer", "artisan", "sage", "guard"].map(bx), v: [
     ["你的角色在当冒险者之前，最拿手的是？",
-      "种地、养牲口", "抄写、整理文件", "在街头讨生活，什么都干过",
+      "种地、养牲口", "誊写文书，一个错字都不放过", "在街头讨生活，什么都干过",
       "打造武器和工具", "研究古老的学问", "站岗放哨，一眼认出可疑的人"],
     ["队伍里有件杂事需要人负责，你主动揽下了：",
-      "照顾马匹和驮兽", "写冒险日志、画地图", "打听小道消息，跟三教九流混熟",
+      "照顾马匹和驮兽", "替大家记账、记日志", "打听小道消息，跟三教九流混熟",
       "修补盔甲和武器", "辨认路上遇到的怪物和遗迹", "安排夜里谁守夜"],
     ["你的角色手上有一层老茧，那是因为：",
       "常年握锄头、挑扁担", "天天握笔写字", "在街头扛货、翻墙、打架",
@@ -966,7 +972,7 @@ QUIZ.slots = [
   { kind: "class", fx: ["warlock", "wizard", "cleric", "paladin", "sorcerer", "barbarian"].map(cx), v: [
     ["你觉得真正的力量来自哪里？",
       "来自交易：想要什么，就付出相应的代价", "来自知识：懂得越多，能做的越多", "来自信仰：相信的力量能创造奇迹",
-      "来自誓言：为了守护的人，可以变得无比强大", "来自天赋：有些东西，是生来就有的", "来自内心：愤怒和野性，就是最原始的力量"],
+      "来自誓言：为了守护的人，可以变得无比强大", "来自天赋：有些东西，是生来就有的", "来自血性：天不怕地不怕，就是最强的力量"],
     ["你在地下城捡到一本会说话的书，它说能给你力量。你会？",
       "先问它要什么代价，划算就签", "带回去好好研究，弄懂它的原理", "交给神殿，让神明来判断",
       "问它：这份力量能用来保护别人吗？", "不需要，你感觉自己体内也有类似的东西", "一把撕了：我的力量不靠书"],
@@ -1009,13 +1015,13 @@ QUIZ.slots = [
   ]},
   { kind: "class", fx: ["fighter", "rogue", "ranger", "druid", "bard", "warlock"].map(cx), v: [
     ["终于到了最终决战，你希望自己在战场上做什么？",
-      "站在最前排，用盾和剑撑住整条防线", "藏在阴影里，等待一击致命的机会", "站在高处，一箭一个精准点名",
+      "冲在最前面，一人一剑杀出一条血路", "藏在阴影里，等待一击致命的机会", "站在高处，一箭一个精准点名",
       "变身成一头巨熊，冲进敌阵", "在后方弹奏战歌，让所有人越战越勇", "召唤契约里的恐怖力量，让敌人心生绝望"],
     ["冒险者公会让你挑一件装备，你选？",
-      "一身精钢重甲", "一对淬了毒的匕首", "一张能射穿龙鳞的长弓",
+      "一把传说中的名剑", "一对淬了毒的匕首", "一张能射穿龙鳞的长弓",
       "一根长出了新芽的橡木杖", "一把会自己奏乐的鲁特琴", "一枚刻着陌生符文、摸起来冰凉的戒指"],
     ["公会给你发了一枚徽章，你希望上面刻着什么？",
-      "一把剑", "一把匕首", "一支箭", "一片叶子", "一个音符", "一只睁开的眼睛"]
+      "两把交叉的剑", "一把匕首", "一支箭", "一片叶子", "一个音符", "一只睁开的眼睛"]
   ]},
   { kind: "bg", fx: ["sage", "entertainer", "guide", "wayfarer", "charlatan", "hermit"].map(bx), v: [
     ["路上遇到麻烦，你最先想到找谁帮忙？",
@@ -1029,6 +1035,49 @@ QUIZ.slots = [
       "流浪汉和街头孩子", "骗子……不，“生意伙伴”", "没什么朋友，只有山里的鸟"]
   ]}
 ];
+
+
+// ===== 职业线索 =====
+// 背景题、物种题，以及两道阵营题的选项，也会顺带给一个职业 +1。
+// 这样判断职业的题从 13 道变成 29 道，分数更容易拉开。每个职业得到的线索都是 7 个。
+var BG_HINT = { acolyte: "cleric", artisan: "artificer", charlatan: "bard", criminal: "rogue",
+  entertainer: "bard", farmer: "druid", guard: "paladin", guide: "ranger", hermit: "monk",
+  merchant: "warlock", noble: "sorcerer", sage: "wizard", sailor: "barbarian", scribe: "artificer",
+  soldier: "fighter", wayfarer: "rogue" };
+var OPTION_HINT = {
+  1:  ["paladin", null, null, null, null, null],                         // 钱包：交给警察
+  2:  [null, "monk", "bard", "warlock", "barbarian", "cleric"],          // 可爱 淡定 爱玩 神秘 豪爽 阳光
+  5:  ["ranger", "druid", "rogue", "fighter", "monk", "sorcerer"],       // 森林 海边 城市 山洞 云海 火山
+  13: ["druid", "fighter", "barbarian", "paladin", null, "warlock"],     // 树屋 地下城 鸟巢 广场 出海 花海
+  15: ["cleric", null, null, null, null, null],                          // 小孩偷面包：付钱并劝阻
+  17: ["monk", "druid", null, "sorcerer", "artificer", "wizard"],        // 飞 水下 黑暗 火 机器 魔力
+  22: ["paladin", "warlock", "sorcerer", "druid", "barbarian", "fighter"], // 天使 恶魔 龙 妖精 神兽 巨人
+  25: ["wizard", "ranger", "wizard", "cleric", "sorcerer", "warlock"],   // 魔法 野兽 机器 圣地 新鲜事 妖精
+  29: ["cleric", "fighter", null, null, "paladin", "ranger"],            // 湖边 英雄 小店 到处玩 王都 森林
+  33: ["barbarian", null, "monk", null, "wizard", "ranger"]              // 石魔像 小老鼠 老乌龟 机械狗 黑猫 灰狼
+};
+QUIZ.slots.forEach(function (slot, si) {
+  slot.fx = slot.fx.map(function (fx, oi) {
+    var cls = null;
+    if (slot.kind === "bg") {
+      var p = Object.keys(fx.b).filter(function (k) { return fx.b[k] === 2; })[0];
+      cls = BG_HINT[p];
+    } else if (OPTION_HINT[si]) {
+      cls = OPTION_HINT[si][oi];
+    }
+    if (!cls) return fx;
+    var o = {}, k;
+    for (k in fx) o[k] = fx[k];
+    var c = {};
+    if (fx.c) for (k in fx.c) c[k] = fx.c[k];
+    c[cls] = (c[cls] || 0) + 1;
+    o.c = c;
+    return o;
+  });
+});
+
+// 阵营分界线：大家答题时偏向“好人”选项，所以要更明显地守规矩 / 做好事，才算守序 / 善良
+QUIZ.alignCut = { lawful: 4, chaotic: -1, good: 4, evil: -2 };
 
 // 物种校准：同一种外形里，每个物种出现的机会差不多
 QUIZ.calib = { s: {"human":0.15,"elf":0.21,"dwarf":-0.35,"halfling":-0.09,"gnome":-0.34,"dragonborn":-0.78,"tiefling":-0.11,"aasimar":-1.27,"goliath":-0.89,"orc":-0.23,"halfelf":0.7,"halforc":-0.12,"aarakocra":-0.08,"bugbear":0.42,"centaur":0.04,"changeling":0.48,"deepgnome":-0.08,"duergar":0.24,"eladrin":0.89,"fairy":0.11,"firbolg":-0.78,"genasi_air":0.13,"genasi_earth":0.95,"genasi_fire":-0.53,"genasi_water":-1.19,"githyanki":0.84,"githzerai":1.04,"goblin":0.68,"harengon":-1.45,"hobgoblin":-0.19,"kenku":-0.58,"kobold":-0.91,"lizardfolk":0.45,"minotaur":1.32,"satyr":-0.85,"seaelf":-0.25,"shadarkai":1.14,"shifter":-1.21,"tabaxi":0.65,"tortle":-1.16,"triton":-0.79,"yuanti":0.39,"loxodon":0.53,"vedalken":1.25,"simic":0.58,"leonin":1.35,"owlin":-0.09,"astralelf":0.15,"autognome":-0.22,"giff":-0.01,"hadozee":0.36,"plasmoid":-0.16,"thrikreen":-0.62,"kender":-0.83,"warforged":0.04,"kalashtar":-1.08,"khoravar":0.32,"verdan":0.5,"dhampir":-0.65,"hexblood":0.93,"lupin":0.21,"reborn":0.13,"duskling":0.75} };
@@ -1108,7 +1157,7 @@ function quizBuildRun(Q, rand) {
   });
   return {
     classes: Q.classes, species: Q.species, backgrounds: Q.backgrounds,
-    alignments: Q.alignments, alignAxes: Q.alignAxes, calib: Q.calib,
+    alignments: Q.alignments, alignAxes: Q.alignAxes, calib: Q.calib, alignCut: Q.alignCut,
     questions: questions, stages: stages
   };
 }
@@ -1174,6 +1223,12 @@ function quizScore(Q, answers, name) {
     var slot = classForced[2] ? 1 : 2;
     classes[slot] = best(CASTER); classForced[slot] = "caster";
   }
+  // 契合度：和“随便乱答”的人比，你在这个职业上的分数高出多少（换算成 1~99）
+  var classPct = classes.map(function (c) {
+    var s = st.c[c.id];
+    var z = s ? ((pts.c[c.id] || 0) - s.mu) / s.sd : 0;
+    return Math.max(1, Math.min(99, Math.round(50 + 18 * z)));
+  });
   var species = top3(Q.species, function (sp) {
     var t = sp.tags.map(function (tag) { return norm("s", tag); });
     // 第一个标签最重要，第二个次之，第三个再次
@@ -1181,8 +1236,9 @@ function quizScore(Q, answers, name) {
   });
   var backgrounds = top3(Q.backgrounds, function (b) { return raw("b", b.id) + cal("b", b.id); });
 
-  var law = lc >= 2 ? "L" : lc <= -2 ? "C" : "N";
-  var good = ge >= 2 ? "G" : ge <= -2 ? "E" : "N";
+  var CUT = Q.alignCut || { lawful: 2, chaotic: -2, good: 2, evil: -2 };
+  var law = lc >= CUT.lawful ? "L" : lc <= CUT.chaotic ? "C" : "N";
+  var good = ge >= CUT.good ? "G" : ge <= CUT.evil ? "E" : "N";
   var key = law === "N" && good === "N" ? "N" : law + good;
   var alignment = Q.alignments[key];
 
@@ -1198,6 +1254,8 @@ function quizScore(Q, answers, name) {
   return {
     classes: classes,
     classForced: classForced,
+    classPct: classPct,
+    cut: CUT,
     species: species,
     backgrounds: backgrounds,
     alignmentKey: key,
@@ -1334,9 +1392,14 @@ if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quiz
     return '<span class="star">' + "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n) + "</span> " + word;
   }
 
-  function pickBlock(list, withStars, forced) {
+  function fit(p) {
+    return '<div class="fit"><span class="fit-l">契合度</span><span class="fit-bar"><i style="width:' + p + '%"></i></span><span class="fit-n">' + p + "%</span></div>";
+  }
+
+  function pickBlock(list, withStars, forced, pcts) {
     var m = list[0];
     var html = '<div class="pick-main"><div class="nm">' + esc(m.zh) + '<span class="en">' + esc(m.en) + "</span></div>";
+    if (pcts) html += fit(pcts[0]);
     if (withStars) html += '<div class="diff">上手难度 ' + stars(m.stars) + "</div>";
     if (m.lore) {
       html += '<p class="lore">' + esc(m.lore) + "</p>";
@@ -1351,7 +1414,8 @@ if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quiz
       if (f) html += '<span class="tagline-s">' + (f === "melee" ? "想打近战的话：" : "想用魔法的话：") + "</span>";
       html += '<b>' + esc(a.zh) + '</b><span class="en">' + esc(a.en) + "</span>";
       if (withStars) html += '<span class="diff"> ' + stars(a.stars) + "</span>";
-      html += "<br>" + esc(a.desc);
+      if (pcts) html += fit(pcts[k + 1]);
+      html += (pcts ? "" : "<br>") + esc(a.desc);
       if (a.lore) html += '<details class="more"><summary>展开介绍</summary><p class="lore">' + esc(a.lore) + "</p></details>";
       html += "</div>";
     });
@@ -1374,12 +1438,12 @@ if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quiz
   }
 
   // 位置条：左边是守序 / 善良，右边是混乱 / 邪恶，和九宫格方向一致
-  function axisRow(left, right, val, max, min, note) {
-    var pct = max === min ? 50 : Math.round((max - val) / (max - min) * 100);
-    pct = Math.max(3, Math.min(97, pct));
-    // 阵营的分界线：分数 >= 2 算左边，<= -2 算右边
-    var cut1 = Math.round((max - 1.5) / (max - min) * 100);
-    var cut2 = Math.round((max + 1.5) / (max - min) * 100);
+  function axisRow(left, right, val, max, min, note, hi, lo) {
+    var pos = function (v) { return max === min ? 50 : Math.round((max - v) / (max - min) * 100); };
+    var pct = Math.max(3, Math.min(97, pos(val)));
+    // 阵营的分界线：分数 >= hi 算左边，<= lo 算右边
+    var cut1 = pos(hi - 0.5);
+    var cut2 = pos(lo + 0.5);
     return '<div><div class="axis-row"><span class="end">' + left + '</span><div class="track">' +
       '<span class="third" style="left:' + cut1 + '%"></span><span class="third" style="left:' + cut2 + '%"></span>' +
       '<span class="dot" style="left:' + pct + '%"></span></div><span class="end">' + right + "</span></div>" +
@@ -1389,8 +1453,8 @@ if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quiz
   function renderAlign(r) {
     var a = r.alignment, g = r.range;
     var html = '<div class="axes">' +
-      axisRow("守序", "混乱", r.lc, g.lcMax, g.lcMin, Q.alignAxes.lc) +
-      axisRow("善良", "邪恶", r.ge, g.geMax, g.geMin, Q.alignAxes.ge) + "</div>";
+      axisRow("守序", "混乱", r.lc, g.lcMax, g.lcMin, Q.alignAxes.lc, r.cut.lawful, r.cut.chaotic) +
+      axisRow("善良", "邪恶", r.ge, g.geMax, g.geMin, Q.alignAxes.ge, r.cut.good, r.cut.evil) + "</div>";
     html += '<p class="align-desc"><b>' + esc(a.zh) + '</b><span class="en" style="color:var(--muted);font-size:14px;margin-left:6px">' + esc(a.en) + "</span></p>";
     html += '<p class="lore">' + esc(a.lore) + "</p>";
     html += '<p class="like">就像' + esc(a.like) + "</p>";
@@ -1412,7 +1476,7 @@ if (typeof module !== "undefined") module.exports = { quizScore: quizScore, quiz
     $("r-concept").innerHTML = "一个<span class=\"a\">" + esc(r.alignment.zh) + "</span>的<span class=\"s\">" + esc(s.zh) +
       "</span><span class=\"c\">" + esc(c.zh) + "</span>，当冒险者之前是个<span class=\"b\">" + esc(b.zh) + "</span>。";
     $("r-tagline").textContent = r.alignment.desc + "。";
-    $("r-class").innerHTML = pickBlock(r.classes, true, r.classForced);
+    $("r-class").innerHTML = pickBlock(r.classes, true, r.classForced, r.classPct);
     $("r-species").innerHTML = pickBlock(r.species, false);
     $("r-bg").innerHTML = pickBlock(r.backgrounds, false);
     renderGrid(r.alignmentKey);
